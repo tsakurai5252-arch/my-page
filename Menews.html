@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会員連絡 - Menews</title>
+<style>
+  body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  .container { width: 100%; max-width: 600px; }
+  /* 投稿フォームのスタイル */
+  .admin-panel { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+  input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+  .btn-send { background: #e67e22; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; }
+  /* ニュース表示エリア */
+  .news-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid #e67e22; }
+  .news-meta { font-size: 0.8rem; color: #888; display: flex; justify-content: space-between; }
+  .news-title { font-size: 1.2rem; font-weight: bold; margin: 10px 0; color: #333; }
+  .news-content { white-space: pre-wrap; color: #555; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="admin-panel" id="memberForm">
+    <h3>📢 会員連絡 投稿フォーム</h3>
+    <input type="text" id="memberAuthor" placeholder="投稿者名">
+    <input type="text" id="memberTitle" placeholder="タイトル">
+    <textarea id="memberContent" rows="4" placeholder="内容を入力してください"></textarea>
+    <button class="btn-send" onclick="postMemberNews()">連絡を投稿する</button>
+  </div>
+
+  <hr>
+
+  <div id="newsDisplay">
+    <p style="text-align: center; color: #888;">読み込み中...</p>
+  </div>
+</div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzv0F1UbuWQBGMvPwnI9cTahhJiey6F2-vPeCmYBKu2Odqb2cVxkMyqyqVoWhvBBVvN/exec";
+const MEMBER_ID = "MEM001"; // ADMIN_IDから変更
+const SECRET_SALT = "BLUE_SKY_77";
+
+function genKey(id) {
+  const d = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  return (id + d + SECRET_SALT).split("").reverse().join("");
+}
+
+async function postMemberNews() {
+  const author = document.getElementById("memberAuthor").value;
+  const title = document.getElementById("memberTitle").value;
+  const content = document.getElementById("memberContent").value;
+  
+  if(!author || !title || !content) return alert("全項目入力してください");
+
+  const payload = {
+    mode: "saveNews",
+    id: MEMBER_ID,
+    author: author,
+    title: title,
+    content: content,
+    _v: genKey(MEMBER_ID)
+  };
+
+  const btn = document.querySelector(".btn-send");
+  btn.disabled = true;
+  btn.innerText = "サーバーに送信中...";
+
+  try {
+    const res = await fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify(payload) });
+    const data = await res.json();
+    alert(data.message);
+    location.reload();
+  } catch(e) { 
+    alert("投稿失敗"); 
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "連絡を投稿する";
+  }
+}
+
+async function loadNews() {
+  try {
+    const res = await fetch(`${WEBAPP_URL}?mode=getNews&id=${MEMBER_ID}&_v=${genKey(MEMBER_ID)}`);
+    const newsList = await res.json();
+    const display = document.getElementById("newsDisplay");
+    display.innerHTML = "<h2>最新の投稿</h2>";
+
+    if (!newsList || newsList.length === 0) {
+      display.innerHTML += "<p>現在お知らせはありません。</p>";
+      return;
+    }
+
+    newsList.forEach(item => {
+      display.innerHTML += `
+        <div class="news-card">
+          <div class="news-meta">
+            <span>📅 ${item.date}</span>
+            <span>✍️ ${item.author}</span>
+          </div>
+          <div class="news-title">${item.title}</div>
+          <div class="news-content">${item.content}</div>
+        </div>
+      `;
+    });
+  } catch(e) { 
+    document.getElementById("newsDisplay").innerHTML = "読み込みに失敗しました。";
+  }
+}
+
+loadNews();
+</script>
+</body>
+</html>

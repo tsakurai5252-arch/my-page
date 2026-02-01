@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ポイント交換 - 会員ポータル</title>
+<style>
+  :root { --primary: #fab005; --bg: #fdfae6; --accent: #e67e22; }
+  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f7f9; padding: 20px; display: flex; justify-content: center; color: #333; }
+  .card { background: white; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; overflow: hidden; }
+  .header { background: var(--primary); color: white; padding: 25px; text-align: center; font-weight: bold; font-size: 1.2rem; }
+  .content { padding: 25px; }
+  .point-display { background: var(--bg); padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; border: 1px solid var(--primary); }
+  .point-val { font-size: 36px; font-weight: 800; color: #333; }
+  h3 { font-size: 0.9rem; color: #666; border-left: 4px solid var(--primary); padding-left: 10px; margin: 25px 0 10px; }
+  input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 5px; }
+  .btn-yellow { background: var(--primary); color: white; }
+  .btn-yellow:hover { background: #e5a000; }
+  .btn-outline { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; width: auto; font-size: 0.8rem; border-radius: 8px; }
+  .item-box { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #eee; }
+  .item-info { display: flex; flex-direction: column; }
+  .item-name { font-weight: bold; font-size: 0.95rem; }
+  .item-cost { font-size: 0.8rem; color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">ポイント交換</div>
+  <div class="content">
+    <label style="font-size: 0.8rem; color: #888;">会員番号を入力してください</label>
+    <input type="text" id="memberId" placeholder="例: 1001">
+    <button class="btn btn-yellow" onclick="checkPoints()">残高を確認する</button>
+
+    <div id="pointArea" style="display:none; margin-top:20px;">
+      <div class="point-display">
+        <div style="font-size:12px; color:#888;">現在の保有ポイント</div>
+        <div class="point-val"><span id="resPoints">0</span> <span style="font-size:16px;">pt</span></div>
+      </div>
+
+      <h3>応援</h3>
+      <div class="item-box">
+        <div class="item-info">
+          <span class="item-name">運営を応援</span>
+          <span class="item-cost">100 pt</span>
+        </div>
+        <button class="btn btn-outline" onclick="doExchange('運営の応援', 100)">応援する</button>
+      </div>
+<!--
+      <div class="item-box">
+        <div class="item-info">
+          <span class="item-name">運営を応援</span>
+          <span class="item-cost">100 pt</span>
+        </div>
+        <button class="btn btn-outline" onclick="doExchange('運営を応援', 100)">応援する</button>
+-->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzv0F1UbuWQBGMvPwnI9cTahhJiey6F2-vPeCmYBKu2Odqb2cVxkMyqyqVoWhvBBVvN/exec";
+const SECRET_SALT = "BLUE_SKY_77";
+
+async function genKey(id) {
+  const dateRes = await fetch(`${WEBAPP_URL}?mode=getServerTime`);
+  const serverDate = await dateRes.text();
+  return (id + serverDate + SECRET_SALT).split("").reverse().join("");
+}
+
+async function checkPoints() {
+  const id = document.getElementById("memberId").value.trim();
+  if(!id) return alert("会員番号を入力してください");
+  try {
+    const vKey = await genKey(id);
+    const res = await fetch(`${WEBAPP_URL}?mode=mypage&id=${id}&_v=${vKey}`);
+    const data = await res.json();
+    if(data.result === "success") {
+      document.getElementById("pointArea").style.display = "block";
+      document.getElementById("resPoints").textContent = data.info.points.toLocaleString();
+    } else {
+      alert(data.message);
+    }
+  } catch(e) { alert("通信エラーが発生しました"); }
+}
+
+async function doExchange(itemName, cost) {
+  const id = document.getElementById("memberId").value.trim();
+  const currentPoints = parseInt(document.getElementById("resPoints").textContent.replace(/,/g, ''));
+
+  if(currentPoints < cost) return alert("ポイントが足りません");
+  if(!confirm(`${itemName} (${cost}pt) を交換しますか？`)) return;
+
+  try {
+    const payload = { 
+      mode: "point_use", 
+      id: id, 
+      amount: cost, 
+      itemName: itemName,
+      _v: await genKey(id) 
+    };
+
+    const res = await fetch(WEBAPP_URL, {
+      method: "POST", 
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    
+    alert(data.message);
+    if(data.result === "success") checkPoints(); 
+  } catch(e) { alert("交換処理に失敗しました"); }
+}
+</script>
+</body>
+</html>

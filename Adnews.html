@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>運営からのお知らせ</title>
+<style>
+  body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  .container { width: 100%; max-width: 600px; }
+  /* 投稿フォーム（管理者用） */
+  .admin-panel { background: #fff; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 30px; }
+  input, textarea { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+  .btn-send { background: #e67e22; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; }
+  /* ニュース表示エリア */
+  .news-card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid #e67e22; }
+  .news-meta { font-size: 0.8rem; color: #888; display: flex; justify-content: space-between; }
+  .news-title { font-size: 1.2rem; font-weight: bold; margin: 10px 0; color: #333; }
+  .news-content { white-space: pre-wrap; color: #555; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="admin-panel" id="adminForm">
+    <h3>📢 新規お知らせ投稿</h3>
+    <input type="text" id="adminAuthor" placeholder="更新者名">
+    <input type="text" id="adminTitle" placeholder="タイトル">
+    <textarea id="adminContent" rows="4" placeholder="内容を入力してください"></textarea>
+    <button class="btn-send" onclick="postNews()">ニュースを公開する</button>
+  </div>
+
+  <hr>
+
+  <div id="newsDisplay">
+    <p style="text-align: center; color: #888;">読み込み中...</p>
+  </div>
+</div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxy_csm6SjeGboSzae4wOfNgHBzHGh_ZC2u2ciGc678YhcMRe1A5Zio-upZDzJLFKZn/exec";
+// 簡易認証用：本来はID等でisValidRequestを通す
+const ADMIN_ID = "ADMIN001"; 
+const SECRET_SALT = "BLUE_SKY_77";
+
+function genKey(id) {
+  const d = new Date().toISOString().slice(0,10).replace(/-/g,"");
+  return (id+d+SECRET_SALT).split("").reverse().join("");
+}
+
+// ニュースを投稿する
+async function postNews() {
+  const author = document.getElementById("adminAuthor").value;
+  const title = document.getElementById("adminTitle").value;
+  const content = document.getElementById("adminContent").value;
+  
+  if(!author || !title || !content) return alert("全項目入力してください");
+
+  const payload = {
+    mode: "saveNews",
+    id: ADMIN_ID,
+    author: author,
+    title: title,
+    content: content,
+    _v: genKey(ADMIN_ID)
+  };
+
+  try {
+    const res = await fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify(payload) });
+    const data = await res.json();
+    alert(data.message);
+    location.reload(); // 再読み込みして反映
+  } catch(e) { alert("投稿失敗"); }
+}
+
+// ニュースを取得して表示する
+async function loadNews() {
+  try {
+    const res = await fetch(`${WEBAPP_URL}?mode=getNews&id=${ADMIN_ID}&_v=${genKey(ADMIN_ID)}`);
+    const newsList = await res.json();
+    const display = document.getElementById("newsDisplay");
+    display.innerHTML = "<h2>最新のお知らせ</h2>";
+
+    if (newsList.length === 0) {
+      display.innerHTML += "<p>現在お知らせはありません。</p>";
+      return;
+    }
+
+    newsList.forEach(item => {
+      display.innerHTML += `
+        <div class="news-card">
+          <div class="news-meta">
+            <span>📅 ${item.date}</span>
+            <span>✍️ ${item.author}</span>
+          </div>
+          <div class="news-title">${item.title}</div>
+          <div class="news-content">${item.content}</div>
+        </div>
+      `;
+    });
+  } catch(e) { 
+    document.getElementById("newsDisplay").innerHTML = "読み込みに失敗しました。";
+  }
+}
+
+// 起動時にニュース読み込み
+loadNews();
+</script>
+</body>
+</html>

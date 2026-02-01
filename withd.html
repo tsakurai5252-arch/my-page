@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>会員 停止・復旧管理</title>
+<style>
+  body { font-family: sans-serif; background: #fdfdfd; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 320px; border-top: 5px solid #d9534f; }
+  h2 { font-size: 1.2rem; text-align: center; color: #333; margin-bottom: 5px; }
+  .mode-desc { font-size: 0.75rem; color: #666; margin-bottom: 15px; text-align: center; }
+  label { display: block; margin-top: 15px; font-size: 0.85rem; font-weight: bold; color: #444; }
+  input { width: 100%; padding: 10px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
+  
+  .btn-withdraw { background: #d9534f; color: white; }
+  .btn-resume { background: #5bc0de; color: white; margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 20px; }
+  
+  button { width: 100%; padding: 12px; border: none; border-radius: 4px; cursor: pointer; margin-top: 8px; font-weight: bold; transition: 0.3s; }
+  button:hover { opacity: 0.8; }
+  button:disabled { background: #ccc; cursor: not-allowed; }
+  
+  .recovery-section { margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee; }
+  #statusMsg { margin-top: 15px; font-size: 0.9rem; text-align: center; min-height: 1.2em; }
+</style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>利用停止・退会</h2>
+  <div class="mode-desc">即座にQRコードを無効化します</div>
+  
+  <label>会員番号 (ID)</label>
+  <input type="text" id="memberIdInput" placeholder="A1001">
+  
+  <button id="withdrawBtn" class="btn-withdraw" onclick="process('withdraw')">利用を停止する</button>
+
+  <div class="recovery-section">
+    <h2>利用再開手続き</h2>
+    <div class="mode-desc">間違えて停止した場合の復旧用</div>
+    
+    <label>復旧用パスワード</label>
+    <input type="password" id="recoveryPw" placeholder="パスワードを入力">
+    
+    <button id="resumeBtn" class="btn-resume" onclick="process('resume')" style="background:#5cb85c;">利用を再開する</button>
+  </div>
+
+  <div id="statusMsg"></div>
+</div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxy_csm6SjeGboSzae4wOfNgHBzHGh_ZC2u2ciGc678YhcMRe1A5Zio-upZDzJLFKZn/exec";
+const SECRET_SALT = "BLUE_SKY_77";
+
+function generateAlgoKey(id) {
+  const today = new Date().toISOString().slice(0,10).replace(/-/g, "");
+  return (id + today + SECRET_SALT).split("").reverse().join("");
+}
+
+async function process(mode) {
+  const id = document.getElementById("memberIdInput").value;
+  const pw = document.getElementById("recoveryPw").value;
+  const msg = document.getElementById("statusMsg");
+
+  if (!id) { alert("IDを入力してください"); return; }
+  if (mode === 'resume' && !pw) { alert("復旧用パスワードを入力してください"); return; }
+  
+  const confirmMsg = mode === 'withdraw' ? "本当に停止しますか？" : "この会員の利用を再開しますか？";
+  if (!confirm(confirmMsg)) return;
+
+  msg.textContent = "処理中...";
+  msg.style.color = "black";
+
+  const data = {
+    id: id,
+    mode: mode, // "withdraw" or "resume"
+    pw: pw,     // 再開時のみ使用
+    _v: generateAlgoKey(id)
+  };
+
+  try {
+    const response = await fetch(WEBAPP_URL, {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+    const result = await response.json();
+    
+    if (result.result === "success") {
+      msg.textContent = mode === 'withdraw' ? "停止完了しました" : "利用を再開しました";
+      msg.style.color = "green";
+      if(mode === 'resume') document.getElementById("recoveryPw").value = "";
+    } else {
+      msg.textContent = "エラー: " + result.message;
+      msg.style.color = "red";
+    }
+  } catch (e) {
+    msg.textContent = "通信に失敗しました。";
+    msg.style.color = "red";
+  }
+}
+</script>
+</body>
+</html>

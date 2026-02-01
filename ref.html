@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>期限更新 - 会員システム</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
+<style>
+  :root { --primary-color: #27ae60; --bg-color: #f8f9fa; }
+  body { font-family: sans-serif; background: var(--bg-color); padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  .card { background: white; padding: 25px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 100%; max-width: 400px; box-sizing: border-box; }
+  h2 { text-align: center; color: #333; margin-top: 0; }
+  .input-group { margin-bottom: 15px; }
+  label { display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: #666; }
+  input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; box-sizing: border-box; }
+  .btn { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: 0.2s; margin-top: 10px; }
+  .btn-primary { background: var(--primary-color); color: white; }
+  .btn-scan { background: #34495e; color: white; margin-bottom: 15px; }
+  
+  /* 結果表示エリア */
+  #resultArea { 
+    display: none; margin-top: 20px; padding: 15px; border-radius: 12px; 
+    background: #e9f7ef; border: 1px solid #27ae60; text-align: center; 
+  }
+  .new-date { font-size: 1.5rem; font-weight: bold; color: #27ae60; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <h2>会員期限の更新</h2>
+  
+  <button class="btn btn-scan" onclick="startScan()">QRスキャンで入力</button>
+  <div id="reader" style="width:100%; display:none; margin-bottom:15px;"></div>
+
+  <div class="input-group">
+    <label>会員番号 (ID)</label>
+    <input type="text" id="memberId" placeholder="例: 1001">
+  </div>
+  <div class="input-group">
+    <label>お名前</label>
+    <input type="text" id="memberName" placeholder="例: 山田 太郎">
+  </div>
+
+  <button class="btn btn-primary" id="submitBtn" onclick="submitRenew()">1年延長を確定する</button>
+
+  <div id="resultArea">
+    <div style="font-size:0.9rem; color:#27ae60;">更新が完了しました！</div>
+    <div class="new-date" id="resExpText">----/--/--</div>
+    <div style="font-size:0.8rem; color:#666;">まで有効です</div>
+  </div>
+</div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxy_csm6SjeGboSzae4wOfNgHBzHGh_ZC2u2ciGc678YhcMRe1A5Zio-upZDzJLFKZn/exec";
+const SECRET_SALT = "BLUE_SKY_77";
+
+function generateAlgoKey(id) {
+  const today = new Date().toISOString().slice(0,10).replace(/-/g, "");
+  return (id + today + SECRET_SALT).split("").reverse().join("");
+}
+
+async function submitRenew() {
+  const id = document.getElementById("memberId").value.trim();
+  const name = document.getElementById("memberName").value.trim();
+  const btn = document.getElementById("submitBtn");
+  const resultArea = document.getElementById("resultArea");
+
+  if (!id || !name) return alert("IDと名前を入力してください");
+  if (!confirm(`${name} 様の期限を1年延長します。よろしいですか？`)) return;
+
+  btn.disabled = true;
+  btn.textContent = "更新処理中...";
+
+  const payload = {
+    mode: "renew",
+    id: id,
+    n: name,
+    _v: generateAlgoKey(id)
+  };
+
+  try {
+    const response = await fetch(WEBAPP_URL, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    
+    const result = await response.json();
+
+    if (result.result === "success") {
+      // GASからのレスポンス info.newExp を表示する
+      document.getElementById("resExpText").textContent = result.info.newExp;
+      resultArea.style.display = "block";
+      alert("更新に成功しました。");
+    } else {
+      alert("エラー: " + result.message);
+    }
+  } catch (e) {
+    alert("通信エラーが発生しました。");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "1年延長を確定する";
+  }
+}
+
+// QRスキャン機能（簡易版）
+function startScan() {
+  const readerDiv = document.getElementById("reader");
+  readerDiv.style.display = "block";
+  const html5QrCode = new Html5Qrcode("reader");
+  html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, 
+    (text) => {
+      try {
+        // pako等の解析ロジックは運用に合わせて追加してください
+        // ここでは単純なID入りQRを想定
+        document.getElementById("memberId").value = text; 
+        html5QrCode.stop();
+        readerDiv.style.display = "none";
+      } catch(e) {}
+    }
+  );
+}
+</script>
+</body>
+</html>
