@@ -5,9 +5,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ポイント交換 - 会員ポータル</title>
 <style>
-  :root { --primary: #fab005; --bg: #fdfae6; --accent: #e67e22; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f4f7f9; padding: 20px; display: flex; justify-content: center; color: #333; }
-  .card { background: white; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; overflow: hidden; }
+:root { 
+    --primary: #fab005; 
+    --bg: #fdfae6; 
+    --accent: #e67e22; 
+  }
+
+  /* bodyの修正：縦並び(column)に変更し、全体の高さを100%にする */
+  body { 
+    font-family: 'Helvetica Neue', Arial, sans-serif; 
+    background: #f4f7f9; 
+    margin: 0;
+    padding: 0; 
+    display: flex; 
+    flex-direction: column; /* これで横並びを解消 */
+    align-items: center;    /* 横方向の中央揃え */
+    min-height: 100vh;      /* 画面全体の高さを確保 */
+    color: #333; 
+  }
+
+  /* カードの修正：上下に少し余白を作る */
+  .card { 
+    background: white; 
+    border-radius: 24px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+    width: 90%; 
+    max-width: 400px; 
+    overflow: hidden; 
+    margin-top: 40px;    /* 上側の余白 */
+    margin-bottom: 20px; /* 下側の余白 */
+  }
+
+  /* フッターの修正：確実に一番下に配置する */
+  #common-footer {
+    margin-top: auto;   /* 余ったスペースを上に使い、自分を最下部に押し下げる */
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    color: #888;
+    font-size: 12px;
+  }
+
+  /* 以下、既存のスタイル（そのまま） */
   .header { background: var(--primary); color: white; padding: 25px; text-align: center; font-weight: bold; font-size: 1.2rem; }
   .content { padding: 25px; }
   .point-display { background: var(--bg); padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; border: 1px solid var(--primary); }
@@ -126,4 +165,5 @@ async function doExchange(itemName, cost) {
 </body>
 
 </html>
+
 
