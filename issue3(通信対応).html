@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>デジタル会員証 発行システム</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+<style>
+  body { font-family: sans-serif; background: #f5f5f5; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  .form-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 320px; }
+  h2 { font-size: 1.2rem; text-align: center; color: #333; margin-top: 0; }
+  label { display: block; margin-top: 10px; font-size: 0.85rem; color: #666; font-weight: bold; }
+  input { width: 100%; padding: 10px; margin-top: 4px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
+  button { width: 100%; padding: 12px; background: #007bff; color: white; border: none; border-radius: 4px; margin-top: 20px; cursor: pointer; font-weight: bold; }
+  button:disabled { background: #ccc; }
+  #card { display: none; margin-top: 20px; text-align: center; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+  #qrcode { margin: 15px 0; display: inline-block; }
+  .dl-btn { background: #28a745; margin-top: 10px; display: none; }
+</style>
+</head>
+<body>
+
+<div class="form-container">
+  <h2>通常会員証 発行</h2>
+  <label>お名前</label>
+  <input type="text" id="name" placeholder="例: 山田 太郎">
+  <label>会員番号 (ID)</label>
+  <input type="text" id="memberId" placeholder="例: 1001">
+  <label>有効期限</label>
+  <input type="date" id="expireDate">
+  <button id="genBtn" onclick="generateAndRegister()">QR生成 ＆ シート登録</button>
+</div>
+
+<div id="card">
+  <h3 id="nameText" style="margin:0; color:#333;"></h3>
+  <div id="qrcode"></div>
+  <p id="expireText" style="font-size: 0.8rem; color: #888; margin: 5px 0;"></p>
+  <button class="dl-btn" id="dlBtn" onclick="downloadQR()">画像を保存 (3mmフチ付)</button>
+</div>
+
+<canvas id="downloadCanvas" width="270" height="270" style="display:none;"></canvas>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxy_csm6SjeGboSzae4wOfNgHBzHGh_ZC2u2ciGc678YhcMRe1A5Zio-upZDzJLFKZn/exec";
+
+// 初期値として1年後を設定
+const d = new Date();
+d.setFullYear(d.getFullYear() + 1);
+document.getElementById("expireDate").value = d.toISOString().split('T')[0];
+
+async function generateAndRegister() {
+  const name = document.getElementById("name").value.trim();
+  const id = document.getElementById("memberId").value.trim();
+  const exp = document.getElementById("expireDate").value;
+  if(!name || !id || !exp) return alert("全項目入力してください");
+
+  const genBtn = document.getElementById("genBtn");
+  genBtn.disabled = true;
+  genBtn.textContent = "登録中...";
+
+  const payload = { mode: "issue", type: 1, name: name, id: id, exp: exp };
+
+  try {
+    const res = await fetch(WEBAPP_URL, { method: "POST", body: JSON.stringify(payload) });
+    const result = await res.json();
+
+    if(result.result === "success") {
+      const jsonStr = JSON.stringify({ n: name, id: id });
+      const compressed = pako.deflate(jsonStr);
+      const base64 = btoa(String.fromCharCode(...compressed));
+      
+      const qrdest = document.getElementById("qrcode");
+      qrdest.innerHTML = "";
+      new QRCode(qrdest, { text: base64, width: 200, height: 200 });
+      
+      document.getElementById("nameText").textContent = name;
+      document.getElementById("expireText").textContent = "有効期限: " + exp;
+      document.getElementById("card").style.display = "block";
+      document.getElementById("dlBtn").style.display = "block";
+      alert("登録完了！");
+    } else {
+      alert("エラー: " + result.message);
+    }
+  } catch(e) {
+    alert("通信失敗。URLを確認してください。");
+  } finally {
+    genBtn.disabled = false;
+    genBtn.textContent = "QR生成 ＆ シート登録";
+  }
+}
+
+function downloadQR() {
+  const qrImg = document.querySelector("#qrcode img");
+  const canvas = document.getElementById("downloadCanvas");
+  const ctx = canvas.getContext("2d");
+  const padding = 35; // 約3mm
+  
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(qrImg, padding, padding, 200, 200);
+  
+  const link = document.createElement("a");
+  link.download = `QR_${document.getElementById("memberId").value}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+</script>
+</body>
+</html>

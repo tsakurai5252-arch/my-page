@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者パネル</title>
+<style>
+  body { font-family: sans-serif; background: #2c3e50; padding: 20px; display: flex; flex-direction: column; align-items: center; color: white; }
+  .container { width: 100%; max-width: 450px; }
+  h1 { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #34495e; padding-bottom: 10px; }
+  .menu-item { background: #34495e; padding: 20px; border-radius: 12px; text-decoration: none; color: white; display: flex; align-items: center; margin-bottom: 15px; border-left: 5px solid #e67e22; transition: 0.2s; }
+  .menu-item:hover { background: #3e5871; }
+  .icon { font-size: 1.5rem; margin-right: 15px; }
+  .title { font-weight: bold; display: block; }
+  .desc { font-size: 0.8rem; color: #bdc3c7; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>管理者パネル</h1>
+  <a href="./files/verify(通信対応).html" class="menu-item">
+    <div class="icon">🔍</div>
+    <div class="content"><span class="title">入場照会（スキャン）</span><span class="desc">来場者のQRコードをチェック</span></div>
+  </a>
+  <a href="./QR発行/issue(通信対応).html" class="menu-item">
+    <div class="icon">📝</div>
+    <div class="content"><span class="title">新規・再発行</span><span class="desc">新しい会員証の発行(通常)</span></div>
+  <a href="./QR発行/issue2(通信対応).html" class="menu-item">
+    <div class="icon">📝</div>
+    <div class="content"><span class="title">新規・再発行</span><span class="desc">新しい会員証の発行(一回限り)</span></div>
+  <a href="./QR発行/issue3(通信対応).html" class="menu-item">
+    <div class="icon">📝</div>
+    <div class="content"><span class="title">新規・再発行</span><span class="desc">新しい会員証の発行(発行日限り)</span></div>
+  <
+  <a href="./files/withd.html" class="menu-item">
+    <div class="icon">🔒</div>
+    <div class="content"><span class="title">停止・復旧</span><span class="desc">会員のステータス変更</span></div>
+  </a>
+  <a href="https://docs.google.com/spreadsheets/d/1hLf-NNar4gRHVeoyewAXBoc21Q22AjyKZOAgEFuYof8" target="_blank" class="menu-item" style="border-left-color: #27ae60;">
+    <div class="icon">📊</div>
+    <div class="content"><span class="title">マスターデータ</span><span class="desc">スプレッドシートを直接開く</span></div>
+  </a>
+</div>
+</body>
+</html>
