@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会員証 照会システム - 高度解析判定モデル</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.1.0/pako.min.js"></script>
+
+<style>
+  :root { 
+    --success: #27ae60; 
+    --error: #e74c3c; 
+    --accent: #2c3e50; 
+    --bg: #f4f4f4; 
+    --card-bg: #ffffff;
+  }
+  
+  body { 
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; 
+    background: var(--bg); 
+    color: #333; 
+    margin: 0; 
+    padding: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+  }
+  
+  h1 { font-size: 1.2rem; letter-spacing: 2px; margin: 20px 0; color: var(--accent); }
+
+  #reader {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background: #000;
+  }
+
+  /* ★判定中表示の中央固定スタイル */
+  #loading {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10000;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 25px 40px;
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    white-space: nowrap;
+  }
+
+  /* くるくる回るアニメーション */
+  .spinner {
+    display: block;
+    margin: 0 auto 10px auto;
+    width: 30px;
+    height: 30px;
+    border: 4px solid rgba(255,255,255,0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+  .result-card {
+    display: none;
+    width: 100%;
+    max-width: 400px;
+    background: var(--card-bg);
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    box-sizing: border-box;
+  }
+
+  .status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .status-ok { background: #eafaf1; color: var(--success); }
+  .status-ng { background: #fdedec; color: var(--error); }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 15px;
+  }
+  .info-item label { font-size: 0.7rem; color: #999; display: block; }
+  .info-item span { font-size: 1rem; font-weight: bold; color: #333; }
+</style>
+</head>
+<body>
+
+  <h1>会員情報照会システム</h1><small><p>QRコードをかざしてください。</p></small>
+  
+  <div id="loading">
+    <div class="spinner"></div>
+    サーバーで判定中...
+  </div>
+
+  <div id="reader"></div>
+
+  <div id="resultCard" class="result-card">
+    <div id="statusBadge" class="status-badge">---</div>
+    <div style="font-size: 1.3rem; font-weight: bold;" id="resName">---</div>
+    <div style="font-size: 0.9rem; color: #666;" id="resMsg">---</div>
+    
+    <div class="info-grid">
+      <div class="info-item"><label>会員番号</label><span id="resId">---</span></div>
+      <div class="info-item"><label>保有ポイント</label><span id="resPts">---</span></div>
+      <div class="info-item"><label>有効期限</label><span id="resExp">---</span></div>
+      <div class="info-item"><label>ランク</label><span id="resRank">---</span></div>
+    </div>
+  </div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxy_csm6SjeGboSzae4wOfNgHBzHGh_ZC2u2ciGc678YhcMRe1A5Zio-upZDzJLFKZn/exec";
+const SECRET_SALT = "BLUE_SKY_77";
+
+async function generateSecureKey(id) {
+  const dateRes = await fetch(`${WEBAPP_URL}?mode=getServerTime`);
+  const serverDate = await dateRes.text();
+  const raw = id + serverDate + SECRET_SALT;
+  return raw.split("").reverse().join("");
+}
+
+const html5QrCode = new Html5Qrcode("reader");
+
+html5QrCode.start(
+  { facingMode: "environment" }, 
+  { fps: 10, qrbox: 250 },
+  async (decodedText) => {
+    // スキャンを一時停止（二重読み取り防止）
+    html5QrCode.pause();
+    
+    // 中央の判定中表示を出す
+    document.getElementById("loading").style.display = "block";
+    
+    try {
+      // 既存の解析仕様
+      const binaryString = atob(decodedText);
+      const charData = binaryString.split('').map(x => x.charCodeAt(0));
+      const binData = new Uint8Array(charData);
+      const data = JSON.parse(pako.inflate(binData, { to: 'string' }));
+
+      // サーバー通信
+      const vKey = await generateSecureKey(data.id);
+      const url = `${WEBAPP_URL}?mode=verify&id=${data.id}&_v=${vKey}`;
+      const response = await fetch(url);
+      const result = await response.json();
+
+      // 結果表示
+      displayResult(result, data.id);
+
+      // 1秒待機してからスキャン再開
+      setTimeout(() => {
+        document.getElementById("loading").style.display = "none";
+        html5QrCode.resume();
+      }, 1000);
+
+    } catch (e) {
+      console.error(e);
+      alert("解析エラー: 正しい会員証QRではありません");
+      // エラー時も1秒後に再開
+      setTimeout(() => {
+        document.getElementById("loading").style.display = "none";
+        html5QrCode.resume();
+      }, 1000);
+    }
+  }
+).catch(err => {
+  console.error("Camera Error:", err);
+});
+
+function displayResult(data, inputId) {
+  const card = document.getElementById("resultCard");
+  const badge = document.getElementById("statusBadge");
+  card.style.display = "block";
+
+  if (data.result === "success") {
+    badge.textContent = "承認済み";
+    badge.className = "status-badge status-ok";
+    document.getElementById("resName").textContent = data.info.name;
+    document.getElementById("resId").textContent = inputId;
+    document.getElementById("resMsg").textContent = "利用可能です";
+    document.getElementById("resPts").textContent = Number(data.info.points).toLocaleString();
+    document.getElementById("resExp").textContent = data.info.exp;
+    document.getElementById("resRank").textContent = data.info.rank;
+    if (data.info.rankColor) document.getElementById("resRank").style.color = data.info.rankColor;
+  } else {
+    badge.textContent = "照会エラー";
+    badge.className = "status-badge status-ng";
+    document.getElementById("resName").textContent = data.name || "不明な会員";
+    document.getElementById("resId").textContent = inputId;
+    document.getElementById("resMsg").textContent = data.message;
+    document.getElementById("resPts").textContent = "---";
+    document.getElementById("resExp").textContent = "---";
+    document.getElementById("resRank").textContent = "---";
+  }
+}
+</script>
+</body>
+</html>
