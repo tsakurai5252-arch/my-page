@@ -5,33 +5,72 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>マイページ - 会員ポータル</title>
 <style>
-  :root { --primary: #007bff; --gold: #d4af37; --platinum: #374151; --silver: #a0a0a0; --base: #666666; }
-  body { font-family: 'Helvetica Neue', Arial, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
-  .card { background: white; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; overflow: hidden; animation: fadeIn 0.6s ease; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  
-  .header { background: #fff; padding: 30px 20px 10px; text-align: center; }
-  .login-section { padding: 20px; }
-  input { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; transition: 0.3s; box-sizing: border-box; }
-  input:focus { border-color: var(--primary); outline: none; }
-  .btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-  .btn:hover { opacity: 0.9; transform: scale(0.98); }
+:root { 
+  --primary: #007bff; 
+  --gold: #d4af37; 
+  --platinum: #374151; 
+  --silver: #a0a0a0; 
+  --base: #666666; 
+}
 
-  /* 認証後の表示エリア */
-  .result-area { display: none; padding-bottom: 30px; }
-  .rank-section { text-align: center; padding: 10px 0; }
-  .rank-badge { display: inline-block; padding: 6px 20px; border-radius: 50px; color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
-  
-  /* ポイント表示のリッチ化 */
-  .point-container { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); margin: 0 25px 20px; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
-  .point-label { font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
-  .point-value { font-size: 48px; font-weight: 800; color: #333; line-height: 1; }
-  .point-unit { font-size: 16px; margin-left: 5px; color: #555; }
+/* bodyの修正：縦並びに変更し、高さを確保する */
+body { 
+  font-family: 'Helvetica Neue', Arial, sans-serif; 
+  background: #f0f2f5; 
+  margin: 0; 
+  padding: 0; 
+  display: flex; 
+  flex-direction: column; /* これが重要！要素を縦に並べる */
+  align-items: center;    /* 中央揃え */
+  min-height: 100vh;      /* 画面の高さを最低100%にする */
+}
 
-  .user-info { padding: 0 30px; }
-  .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #555; font-size: 14px; }
-  .info-row strong { color: #222; }
-  .msg-box { margin: 20px 25px 0; padding: 15px; background: #fff9db; border-left: 4px solid #fab005; border-radius: 8px; font-size: 13px; color: #665c33; }
+/* カードの修正：上下に適切な余白を作る */
+.card { 
+  background: white; 
+  border-radius: 24px; 
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+  width: 95%; 
+  max-width: 400px; 
+  overflow: hidden; 
+  animation: fadeIn 0.6s ease; 
+  margin: 40px 0 20px 0; /* 上40px、下20pxの隙間 */
+}
+
+/* フッターの修正：確実に一番下に押し下げる */
+#common-footer {
+  margin-top: auto; /* 余ったスペースを全部上に使い、自分を最下部へ移動させる */
+  padding: 20px;
+  color: #666;
+  font-size: 12px;
+  text-align: center;
+}
+
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(20px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
+
+.header { background: #fff; padding: 30px 20px 10px; text-align: center; }
+.login-section { padding: 20px; }
+input { width: 100%; padding: 14px; margin-bottom: 12px; border: 2px solid #eee; border-radius: 12px; font-size: 16px; transition: 0.3s; box-sizing: border-box; }
+input:focus { border-color: var(--primary); outline: none; }
+.btn { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+.btn:hover { opacity: 0.9; transform: scale(0.98); }
+
+.result-area { display: none; padding-bottom: 30px; }
+.rank-section { text-align: center; padding: 10px 0; }
+.rank-badge { display: inline-block; padding: 6px 20px; border-radius: 50px; color: white; font-size: 14px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 15px; }
+
+.point-container { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); margin: 0 25px 20px; padding: 25px; border-radius: 20px; text-align: center; border: 1px solid rgba(0,0,0,0.05); }
+.point-label { font-size: 12px; color: #888; text-transform: uppercase; margin-bottom: 5px; font-weight: bold; }
+.point-value { font-size: 48px; font-weight: 800; color: #333; line-height: 1; }
+.point-unit { font-size: 16px; margin-left: 5px; color: #555; }
+
+.user-info { padding: 0 30px; }
+.info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #555; font-size: 14px; }
+.info-row strong { color: #222; }
+.msg-box { margin: 20px 25px 0; padding: 15px; background: #fff9db; border-left: 4px solid #fab005; border-radius: 8px; font-size: 13px; color: #665c33; }
 </style>
 </head>
 <body>
@@ -122,6 +161,7 @@ async function login() {
 </body>
 
 </html>
+
 
 
 
