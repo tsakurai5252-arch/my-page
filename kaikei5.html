@@ -39,10 +39,8 @@
 </div>
 
 <div id="mainUI" style="display:none">
-  <div class="panel">
-    <button id="nextBtn" onclick="nextScan()" style="display:none">次へ (スキャン再開)</button>
-    <button onclick="removeItem()">取消</button>
-  </div>
+  <button id="nextBtn" onclick="nextScan()" style="display:none">次へ (スキャン再開)</button>
+  <button onclick="removeItem()">取消</button>
   <table>
     <thead><tr><th>コード</th><th>価格</th></tr></thead>
     <tbody id="items"></tbody>
@@ -83,18 +81,24 @@ let scanLock = false;
 let total = 0;
 const priceDB = { "4970000000019": 1000, "4970000000020": 200, "4970000000037": 300 };
 
-function startScanning() {
+// 読み取り対象を指定してリセット・起動する関数
+function startScanning(mode) {
   reader.reset();
+  const hints = new Map();
+  // バーコードならEAN系、QRならQR_CODEのみに絞り込む
+  hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, 
+    mode === 'qr' ? [ZXing.BarcodeFormat.QR_CODE] : [ZXing.BarcodeFormat.EAN_13, ZXing.BarcodeFormat.EAN_8]);
+
   reader.decodeFromConstraints({ video: { facingMode: "environment" } }, 'video', (result, err) => {
     if (result && !scanLock) handleScan(result.text);
-  });
+  }, hints);
 }
 
 function startRegister() {
   document.getElementById("startScreen").style.display = "none";
   document.getElementById("cameraArea").style.display = "block";
   document.getElementById("mainUI").style.display = "block";
-  startScanning();
+  startScanning('barcode');
 }
 
 function handleScan(text) {
@@ -107,8 +111,7 @@ function handleScan(text) {
     tr.innerHTML = `<td>${text}</td><td>${priceDB[text]}</td>`;
     document.getElementById("items").appendChild(tr);
     document.getElementById("total").innerText = "合計 ¥" + total;
-  } 
-  else {
+  } else {
     let match = text.match(/(\d+)円/);
     if (match) {
       let val = parseInt(match[1]);
@@ -117,7 +120,6 @@ function handleScan(text) {
       document.getElementById("qrUI").style.display = "none";
       document.getElementById("qrCompleteUI").style.display = "block";
       
-      // QR金額決済時のお釣り計算
       let change = (val >= total) ? (val - total) : 0;
       document.getElementById("qrResultText").innerText = `決済金額: ${val}円\nお釣り: ${change}円`;
       return;
@@ -138,10 +140,7 @@ function finish() {
   setTimeout(() => { location.reload(); }, 10000);
 }
 
-function goPay() { 
-  document.getElementById("mainUI").style.display = "none"; 
-  document.getElementById("paySelect").style.display = "block"; 
-}
+function goPay() { document.getElementById("mainUI").style.display = "none"; document.getElementById("paySelect").style.display = "block"; }
 function payCash() { 
   document.getElementById("paySelect").style.display = "none"; 
   document.getElementById("cashUI").style.display = "block"; 
@@ -150,7 +149,7 @@ function payCash() {
 function payQR() { 
   document.getElementById("paySelect").style.display = "none"; 
   document.getElementById("qrUI").style.display = "block"; 
-  startScanning(); 
+  startScanning('qr'); // QRモードで起動
 }
 function calcChange() {
   let cash = parseInt(document.getElementById("cashInput").value);
