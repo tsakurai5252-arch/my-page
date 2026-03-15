@@ -1,28 +1,35 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>セルフレジ</title>
 <script src="https://unpkg.com/@zxing/library@0.20.0"></script>
 <style>
-body{ font-family:sans-serif; text-align:center; background:#f0f0f0; margin:0; }
-header{ background:#2c3e50; color:white; padding:15px; font-size:24px; }
-button{ font-size:18px; padding:10px 18px; margin:8px; cursor:pointer; }
-video{ width:420px; border:4px solid black; border-radius:10px; }
-#frame{ position:relative; display:inline-block; margin-top:20px; }
-#guide{ position:absolute; border:4px solid red; top:50%; left:50%; transform:translate(-50%,-50%); pointer-events:none; }
-.guide-barcode { width:260px; height:120px; }
-.guide-qr { width:250px; height:250px; }
-table{ margin:auto; border-collapse:collapse; background:white; margin-top:20px; }
-td,th{ border:1px solid #ccc; padding:10px; min-width:120px; }
-#total{ font-size:28px; margin-top:20px; }
-.panel{ margin-top:20px; }
-input{ font-size:18px; padding:8px; }
+  body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 10px; }
+  header { background: #2c3e50; color: white; padding: 15px; font-size: 24px; }
+  button { font-size: 18px; padding: 12px 20px; margin: 8px; cursor: pointer; }
+  #frame { position: relative; display: inline-block; margin-top: 20px; width: 100%; max-width: 420px; }
+  video { width: 100%; border: 4px solid black; border-radius: 10px; display: block; background: #000; }
+  #guide { position: absolute; border: 4px solid red; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
+  .guide-barcode { width: 80%; height: 30%; }
+  .guide-qr { width: 60%; height: 60%; }
+  table { margin: auto; border-collapse: collapse; background: white; margin-top: 20px; width: 90%; }
+  td, th { border: 1px solid #ccc; padding: 10px; }
+  #total { font-size: 28px; margin-top: 20px; }
+  #finishMsg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: none; align-items: center; justify-content: center; font-size: 32px; z-index: 100; }
 </style>
 </head>
 <body>
 
+<div id="finishMsg">ご利用ありがとうございました。</div>
+
 <header>セルフレジ</header>
+
+<div id="startScreen">
+  <h2>開始するにはボタンを押してください</h2>
+  <button onclick="startRegister()">開始 (カメラ起動)</button>
+</div>
 
 <div id="cameraArea" style="display:none">
   <div id="frame">
@@ -31,14 +38,9 @@ input{ font-size:18px; padding:8px; }
   </div>
 </div>
 
-<div id="startScreen">
-  <h2>開始するにはボタンを押してください</h2>
-  <button onclick="startRegister()">開始 (カメラ起動)</button>
-</div>
-
 <div id="mainUI" style="display:none">
   <div class="panel">
-    <button id="nextBtn" onclick="nextScan()" style="display:none">次へ</button>
+    <button id="nextBtn" onclick="nextScan()" style="display:none">次へ (スキャン再開)</button>
     <button onclick="removeItem()">取消</button>
   </div>
   <table>
@@ -50,14 +52,13 @@ input{ font-size:18px; padding:8px; }
 </div>
 
 <div id="paySelect" style="display:none">
-  <h2>支払い方法</h2>
   <button onclick="payCash()">現金</button>
   <button onclick="payQR()">QR決済</button>
 </div>
 
 <div id="cashUI" style="display:none">
-  <h2>現金支払い</h2>
-  <input id="cashInput" type="number">
+  <h3>お支払い金額: <span id="cashTotalDisplay">0</span>円</h3>
+  <input id="cashInput" type="number" placeholder="投入金額を入力">
   <button onclick="calcChange()">計算</button>
   <h3 id="change"></h3>
   <button id="completeBtn" disabled onclick="finish()">完了</button>
@@ -65,11 +66,9 @@ input{ font-size:18px; padding:8px; }
 
 <div id="qrUI" style="display:none">
   <h2>QRを読み取ってください</h2>
-  <button id="qrNext" onclick="nextScan()" style="display:none">次へ</button>
 </div>
 
 <div id="qrCompleteUI" style="display:none">
-  <h2>決済完了</h2>
   <h3 id="qrResultText"></h3>
   <button onclick="finish()">完了</button>
 </div>
@@ -79,128 +78,90 @@ input{ font-size:18px; padding:8px; }
 </audio>
 
 <script>
-const reader = new ZXing.BrowserMultiFormatReader()
-let scanLock=false
-let total=0
-let items=[]
-const priceDB={ "4970000000019":1000, "4970000000020":200, "4970000000037":300 }
+const reader = new ZXing.BrowserMultiFormatReader();
+let scanLock = false;
+let total = 0;
+const priceDB = { "4970000000019": 1000, "4970000000020": 200, "4970000000037": 300 };
 
-function updateGuide(type) {
-    const guide = document.getElementById("guide");
-    guide.className = (type === 'qr') ? 'guide-qr' : 'guide-barcode';
-}
-
-function startScanning(){
+function startScanning() {
   reader.reset();
-  const constraints = { video: { width: { ideal: 1920 }, height: { ideal: 1080 }, facingMode: "environment" } };
-  reader.decodeFromConstraints(constraints, 'video', (result, err) => {
-    if(result){ handleScan(result.text) }
-  }).catch(err => { console.error("カメラ起動エラー: ", err); });
+  reader.decodeFromConstraints({ video: { facingMode: "environment" } }, 'video', (result, err) => {
+    if (result && !scanLock) handleScan(result.text);
+  });
 }
 
-function startRegister(){
-  document.getElementById('video').play();
-  document.getElementById("startScreen").style.display="none"
-  document.getElementById("cameraArea").style.display="block"
-  document.getElementById("mainUI").style.display="block"
-  updateGuide('barcode');
+function startRegister() {
+  document.getElementById("startScreen").style.display = "none";
+  document.getElementById("cameraArea").style.display = "block";
+  document.getElementById("mainUI").style.display = "block";
   startScanning();
 }
 
-function handleScan(text){
-  if(scanLock) return
-  scanLock=true
-  document.getElementById("beep").play()
+function handleScan(text) {
+  scanLock = true;
+  document.getElementById("beep").play();
 
-  if(priceDB[text]){
-    let price = priceDB[text]
-    total += price
-    items.push({code: text, price})
-    addRow(text, price)
-    updateTotal()
-  }
+  if (priceDB[text]) {
+    total += priceDB[text];
+    let tr = document.createElement("tr");
+    tr.innerHTML = `<td>${text}</td><td>${priceDB[text]}</td>`;
+    document.getElementById("items").appendChild(tr);
+    document.getElementById("total").innerText = "合計 ¥" + total;
+  } 
   else {
     let match = text.match(/(\d+)円/);
-    if(match){
+    if (match) {
       let val = parseInt(match[1]);
       reader.reset();
       document.getElementById("cameraArea").style.display = "none";
       document.getElementById("qrUI").style.display = "none";
       document.getElementById("qrCompleteUI").style.display = "block";
-      document.getElementById("qrResultText").innerText = "お支払い金額: " + val + "円\nお釣り: 0円";
-      return; // 処理終了
-    } else {
-      scanLock = false;
+      
+      // QR金額決済時のお釣り計算
+      let change = (val >= total) ? (val - total) : 0;
+      document.getElementById("qrResultText").innerText = `決済金額: ${val}円\nお釣り: ${change}円`;
       return;
     }
   }
-
-  // 合計金額が0より大きい場合のみ「次へ」ボタンを表示
-  if(total > 0){
-    if(document.getElementById("mainUI").style.display !== "none"){
-      document.getElementById("nextBtn").style.display="inline"
-    } else if(document.getElementById("qrUI").style.display !== "none"){
-      document.getElementById("qrNext").style.display="inline"
-    }
-  }
-  scanLock = false; // 次のスキャンへ
+  
+  if (total > 0) document.getElementById("nextBtn").style.display = "inline";
+  else scanLock = false;
 }
 
-function nextScan(){
-  document.getElementById("nextBtn").style.display="none"
-  document.getElementById("qrNext").style.display="none"
+function nextScan() {
+  scanLock = false;
+  document.getElementById("nextBtn").style.display = "none";
 }
 
-function addRow(code,price){
-  let tr=document.createElement("tr")
-  tr.innerHTML="<td>"+code+"</td><td>"+price+"</td>"
-  document.getElementById("items").appendChild(tr)
-}
-
-function updateTotal(){
-  if(total<0) total=0
-  document.getElementById("total").innerText="合計 ¥"+total
-}
-
-function removeItem(){
-  if(items.length==0) return
-  let last=items.pop()
-  total-=last.price
-  let table=document.getElementById("items")
-  table.removeChild(table.lastChild)
-  updateTotal()
-}
-
-function goPay(){
-  document.getElementById("mainUI").style.display="none"
-  document.getElementById("paySelect").style.display="block"
-}
-
-function payCash(){
-  document.getElementById("paySelect").style.display="none"
-  document.getElementById("cashUI").style.display="block"
-  document.getElementById("cameraArea").style.display="none"
-}
-
-function payQR(){
-  document.getElementById("paySelect").style.display="none"
-  document.getElementById("qrUI").style.display="block"
-  updateGuide('qr');
-  scanLock = false
-  startScanning();
-}
-
-function calcChange(){
-  let cash=parseInt(document.getElementById("cashInput").value)
-  let change=cash-total
-  document.getElementById("change").innerText="お釣り "+change+"円"
-  if(cash>=total){ document.getElementById("completeBtn").disabled=false }
-}
-
-function finish(){
-  alert("ご利用ありがとうございました。");
+function finish() {
+  document.getElementById("finishMsg").style.display = "flex";
   setTimeout(() => { location.reload(); }, 10000);
 }
+
+function goPay() { 
+  document.getElementById("mainUI").style.display = "none"; 
+  document.getElementById("paySelect").style.display = "block"; 
+}
+function payCash() { 
+  document.getElementById("paySelect").style.display = "none"; 
+  document.getElementById("cashUI").style.display = "block"; 
+  document.getElementById("cashTotalDisplay").innerText = total;
+}
+function payQR() { 
+  document.getElementById("paySelect").style.display = "none"; 
+  document.getElementById("qrUI").style.display = "block"; 
+  startScanning(); 
+}
+function calcChange() {
+  let cash = parseInt(document.getElementById("cashInput").value);
+  if (!isNaN(cash) && cash >= total) { 
+    document.getElementById("change").innerText = "お釣り " + (cash - total) + "円"; 
+    document.getElementById("completeBtn").disabled = false; 
+  } else {
+    document.getElementById("change").innerText = "金額が不足しています";
+  }
+}
+function removeItem() { location.reload(); }
 </script>
 </body>
 </html>
