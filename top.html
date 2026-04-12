@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会員ポータル</title>
+<style>
+  body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+  .container { width: 100%; max-width: 400px; display: none; } /* 初期は非表示 */
+  h1 { text-align: center; color: #333; margin-bottom: 30px; }
+  .menu-item { background: white; padding: 20px; border-radius: 12px; text-decoration: none; color: #333; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; transition: 0.2s; }
+  .menu-item:active { transform: scale(0.98); background: #fafafa; }
+  .icon { font-size: 1.8rem; margin-right: 15px; width: 40px; text-align: center; }
+  .title { font-weight: bold; display: block; font-size: 1.05rem; }
+  .desc { font-size: 0.8rem; color: #999; }
+
+  /* メンテナンス画面 */
+  #maintenanceView {
+    text-align: center; background: white; padding: 40px 20px;
+    border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 50px;
+    border-top: 6px solid #f39c12;
+  }
+  .m-icon { font-size: 4rem; margin-bottom: 20px; }
+  .m-period { background: #fff9eb; color: #d35400; padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-top: 15px; border: 1px solid #ffeaa7; }
+</style>
+</head>
+<body>
+
+<div class="container" id="mainView">
+  <h1>会員ポータル</h1>
+  <a href="./files/MyPage.html" class="menu-item">
+    <div class="icon">👤</div>
+    <div class="content"><span class="title">マイページ</span><span class="desc">有効期限や保有ポイントを確認できます。</span></div>
+  </a>
+  <a href="./files/ref.html" class="menu-item">
+    <div class="icon">🔄</div>
+    <div class="content"><span class="title">期限更新</span><span class="desc">有効期限を1年間延長することができます</span></div>
+  </a>
+  <a href="./files/point.html" class="menu-item">
+    <div class="icon">🏆</div>
+    <div class="content"><span class="title">ポイント交換・寄付</span><span class="desc">特典交換やギフト送信できます</span></div>
+  </a>
+  <a href="./files/Menews.html" class="menu-item">
+    <div class="icon">📢</div>
+    <div class="content"><span class="title">会員連絡フォーム【Me NEWS】</span><span class="desc">会員同士での雑談が楽しめます</span></div>
+  </a>
+  <a href="./files/Adnews.html" class="menu-item">
+    <div class="icon">📰</div>
+    <div class="content"><span class="title">運営からのお知らせ【Ad NEWS】</span><span class="desc">運営からのお知らせをチェックできます</span></div>
+  </a>
+</div>
+
+<div class="container" id="maintenanceView">
+  <div class="m-icon">🛠️</div>
+  <h2 style="margin:0;">サーバーメンテナンス中</h2>
+  <p id="mMessage" style="color:#666; line-height:1.6; margin-top:15px;"></p>
+  <div class="m-period" id="mPeriod"></div>
+  <p style="font-size: 0.8rem; color: #bbb; margin-top: 25px;">ご迷惑をおかけしますが、ご協力お願いします。</p>
+</div>
+
+<script>
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxy_csm6SjeGboSzae4wOfNgHBzHGh_ZC2u2ciGc678YhcMRe1A5Zio-upZDzJLFKZn/exec";
+
+async function init() {
+  try {
+    const res = await fetch(`${WEBAPP_URL}?mode=checkMaintenance`);
+    const data = await res.json();
+    
+    if (data.isMaintenance) {
+      document.getElementById("mMessage").textContent = data.message;
+      document.getElementById("mPeriod").textContent = "予定期間： " + data.period;
+      document.getElementById("maintenanceView").style.display = "block";
+    } else {
+      document.getElementById("mainView").style.display = "block";
+    }
+  } catch (e) {
+    // 通信エラー時はメインを表示
+    document.getElementById("mainView").style.display = "block";
+  }
+}
+
+window.onload = init;
+</script>
+</body>
+</html>
