@@ -1,106 +1,250 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>会員ポータル</title>
-<style>
-  body { font-family: sans-serif; background: #f0f2f5; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-  .container { width: 100%; max-width: 400px; display: none; } /* 初期は非表示 */
-  h1 { text-align: center; color: #333; margin-bottom: 30px; }
-  .menu-item { background: white; padding: 20px; border-radius: 12px; text-decoration: none; color: #333; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 15px; transition: 0.2s; }
-  .menu-item:active { transform: scale(0.98); background: #fafafa; }
-  .icon { font-size: 1.8rem; margin-right: 15px; width: 40px; text-align: center; }
-  .title { font-weight: bold; display: block; font-size: 1.05rem; }
-  .desc { font-size: 0.8rem; color: #999; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>トップページ - 総合ポータル</title>
+    <style>
+        /* 全体の設定 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
-  /* メンテナンス画面 */
-  #maintenanceView {
-    text-align: center; background: white; padding: 40px 20px;
-    border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-top: 50px;
-    border-top: 6px solid #f39c12;
-  }
-  .m-icon { font-size: 4rem; margin-bottom: 20px; }
-  .m-period { background: #fff9eb; color: #d35400; padding: 10px; border-radius: 8px; font-size: 0.9rem; margin-top: 15px; border: 1px solid #ffeaa7; }
-</style>
+        .main-content {
+            flex: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 60px 20px;
+            text-align: center;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        h1 {
+            font-size: 2rem;
+            letter-spacing: 0.4em;
+            margin-bottom: 10px;
+            color: #444;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            color: #888;
+            margin-bottom: 60px;
+            letter-spacing: 0.2em;
+        }
+
+        /* お知らせセクション */
+        .news-section {
+            max-width: 600px;
+            margin: 0 auto 60px;
+            text-align: left;
+            border-top: 1px solid #ddd;
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .news-item {
+            display: flex;
+            padding: 8px 0;
+            font-size: 0.8rem;
+        }
+
+        .news-date {
+            color: #aaa;
+            width: 90px;
+            flex-shrink: 0;
+        }
+
+        /* カード型レイアウト */
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 40px 30px;
+            border-radius: 2px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: all 0.4s ease;
+            text-align: left;
+            border: 1px solid #eee;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+            border-color: #ddd;
+        }
+
+        .card-category {
+            font-size: 0.7rem;
+            color: #bbb;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #444;
+            font-weight: 400;
+        }
+
+        .card-description {
+            font-size: 0.85rem;
+            color: #777;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        .card-link {
+            font-size: 0.75rem;
+            color: #333;
+            text-decoration: none;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        .card-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: #333;
+            transition: width 0.3s ease;
+        }
+
+        .card-link:hover::after {
+            width: 100%;
+        }
+
+        /* 推奨環境セクション */
+        .requirements-section {
+            background-color: #fff;
+            padding: 40px 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+
+        .requirements-title {
+            font-size: 0.75rem;
+            color: #999;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .requirements-list {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: 0.7rem;
+            color: #bbb;
+        }
+
+        .requirements-list li span {
+            display: block;
+            color: #888;
+            margin-bottom: 3px;
+        }
+
+        /* フッター */
+        footer {
+            padding: 30px 20px;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #bbb;
+            letter-spacing: 0.1em;
+            background: #fff;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
 
-<div class="container" id="mainView">
-  <h1>会員ポータル</h1>
-  <a href="./rikouho.html" class="menu-item">
-    <div class="icon">🪴</div>
-    <div class="content"><span class="title">立候補者一覧</span><span class="desc">立候補者・ポスター確認に最適です</span></div>
-  </a>
-  <a href="./MyPage.html" class="menu-item">
-    <div class="icon">👤</div>
-    <div class="content"><span class="title">マイページ</span><span class="desc">有効期限や保有ポイントを確認できます。</span></div>
-  </a>
-  <a href="./ref.html" class="menu-item">
-    <div class="icon">🔄</div>
-    <div class="content"><span class="title">期限更新</span><span class="desc">有効期限を1年間延長することができます</span></div>
-  </a>
-  <a href="./point.html" class="menu-item">
-    <div class="icon">🏆</div>
-    <div class="content"><span class="title">ポイント交換・寄付</span><span class="desc">特典交換やギフト送信できます</span></div>
-  </a>
-  <a href="./Menews.html" class="menu-item">
-    <div class="icon">📢</div>
-    <div class="content"><span class="title">会員連絡フォーム【Me NEWS】</span><span class="desc">会員同士での雑談が楽しめます</span></div>
-  </a>
-  <a href="./Adnews.html" class="menu-item">
-    <div class="icon">📰</div>
-    <div class="content"><span class="title">運営からのお知らせ【Ad NEWS】</span><span class="desc">運営からのお知らせをチェックできます</span></div>
-  </a>
-    <a href="./Admin.html" class="menu-item">
-    <div class="icon">🔐</div>
-    <div class="content"><span class="title">管理者向けサービス【Admin】</span><span class="desc">管理者向けです</span></div>
-  </a>
-</div>
+    <div class="main-content">
+        <h1>トップページ</h1>
+        <p class="subtitle">総合ポータル</p>
 
-<div class="container" id="maintenanceView">
-  <div class="m-icon">🛠️</div>
-  <h2 style="margin:0;">サーバーメンテナンス中</h2>
-  <p id="mMessage" style="color:#666; line-height:1.6; margin-top:15px;"></p>
-  <div class="m-period" id="mPeriod"></div>
-  <p style="font-size: 0.8rem; color: #bbb; margin-top: 25px;">ご迷惑をおかけしますが、ご協力お願いします。</p>
-</div>
+        <div class="news-section">
+            <div class="news-item">
+                <span class="news-date">2026.04.12</span>
+                <span class="news-text">推奨環境の項目を追加しました。</span><br>
+                <span class="news-text">公開に向けて調整しました。</span>
+            </div>
+        </div>
 
-<script>
-const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbxy_csm6SjeGboSzae4wOfNgHBzHGh_ZC2u2ciGc678YhcMRe1A5Zio-upZDzJLFKZn/exec";
+        <div class="card-container">
+            <div class="card">
+                <span class="card-category">Philosophy</span>
+                <h2 class="card-title">私たちの哲学</h2>
+                <p class="card-description">無駄を削ぎ落とし、本質だけを抽出したデザイン。私たちは、長く愛される普遍的な美しさを追求しています。</p>
+            </div>
 
-async function init() {
-  try {
-    const res = await fetch(`${WEBAPP_URL}?mode=checkMaintenance`);
-    const data = await res.json();
-    
-    if (data.isMaintenance) {
-      document.getElementById("mMessage").textContent = data.message;
-      document.getElementById("mPeriod").textContent = "予定期間： " + data.period;
-      document.getElementById("maintenanceView").style.display = "block";
-    } else {
-      document.getElementById("mainView").style.display = "block";
-    }
-  } catch (e) {
-    // 通信エラー時はメインを表示
-    document.getElementById("mainView").style.display = "block";
-  }
-}
+            <div class="card">
+                <span class="card-category">About</span>
+                <h2 class="card-title">制作実績</h2>
+                <p class="card-description">制作実績の一覧です。製作には生成AIを使用しています。</p>
+                <h2>Webアプリ</h2>
+                <li>寿司タイピング<br><li>精霊の言葉<br><li>言葉の森<br><li>茶道タイピング<br><li>ビンゴカード作成ツール<br><li>囲碁ゲーム<br><li>オセロゲーム<br><li>世界を救え！タイピングマスター<br><li>いざ一流農家へ！あなたの努力で農園が成長<br><li>果物タイピング～果樹園救済物語～<br><li>会員ポータル</li></li></li></li></li></li></li></li></li></li></li>
+                <h2>C++ / C#アプリ</h2>
+                <li>T.S Editor</li>
+            </div>
 
-window.onload = init;
-</script>
-<footer id="common-footer" style="text-align:center; padding:20px; color:#666;"></footer>
+            <div class="card">
+                <span class="card-category">Pages</span>
+                <h2 class="card-title">会員ポータル</h2>
+                <p class="card-description">会員ポータルです。</p>
+                <a href="./top.html" class="card-link">会員ポータルへ</a>
+            </div>
+<!--
+            <div class="card">
+                <span class="card-category">Contact</span>
+                <h2 class="card-title">お問い合わせ</h2>
+                <p class="card-description">受け付けておりません。</p>
+            </div>
+-->
+        </div>
+    </div>
 
-<script>
-  (function() {
-    const year = 2026;
-    const owner = "Homemade tools Project";
-    document.getElementById('common-footer').innerHTML = `<p>(c) ${year} ${owner} All Rights Reserved.</p>`;
-  })();
-</script>
+    <div class="requirements-section">
+        <div class="requirements-title">SYSTEM REQUIREMENTS(推奨環境)</div>
+        <ul class="requirements-list">
+            <li><span>ブラウザ</span>Microsoft Edge / Google Chrome / Safari (Latest)</li>
+            <li><span>画面</span>1280 x 720より高画質のもの</li>
+            <li><span>JavaScript</span>必須</li>
+        </ul>
+    </div>
+
+    <footer>
+        &copy; 2026 HomeMade Tools Project All Rights Reserved.
+    </footer>
+
 </body>
-
 </html>
-
-
-
