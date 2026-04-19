@@ -573,19 +573,17 @@
         });
 </script>
 <script>
-    // 【重要】GASでデプロイした際に発行された「ウェブアプリURL」に書き換えてください。
+    // 【重要】GASの「ウェブアプリURL」に書き換えてください。
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwy46djZyid18LcgijKWrmyM7kjTAeQar2GSjav22e1XCuWJns_Ah4SxW8ouhh_8x5E/exec"; 
 
     async function loadSpreadsheetData() {
         try {
-            // スプレッドシート（GAS）からデータを取得
             const response = await fetch(GAS_URL);
             const data = await response.json();
 
-            // 1. 取得した日付を変数に入れる
             const displayDate = data['日付'] || "2026年4月19日";
 
-            // 2. ヘッダーの日付部分を書き換え
+            // 1. ヘッダーの日付を書き換え
             const headerDate = document.getElementById('header-date');
             if (headerDate) {
                 headerDate.textContent = `${displayDate}　選挙管理委員会`;
@@ -594,70 +592,70 @@
             const statusEl = document.getElementById('result-status');
             const detailsEl = document.getElementById('result-details');
             
-            // 3. 「発表フラグ」が「発表済み」かチェック
+            // 2. 「発表フラグ」の内容で表示を分ける
             if (data['発表フラグ'] === "発表済み") {
-                // 発表済みの場合のメッセージ
+                // 通常の結果発表
                 statusEl.textContent = `${displayDate}の選挙の結果が発表されました。`;
-                detailsEl.style.display = 'block'; // 結果エリアを表示
-                
-                // リーダー名の書き換え
-                const leaderEl = document.getElementById('res-leader');
-                if (leaderEl) {
-                    leaderEl.textContent = data['リーダー'] || "---";
-                }
+                detailsEl.style.display = 'block'; 
+                displayResults(data); // 結果を表示する共通処理
 
-                // 順位の書き換え (1位〜6位)
-                const ranks = [
-                    { id: 'res-rank1', label: '🥇一位', key: '1位' },
-                    { id: 'res-rank2', label: '🥈二位', key: '2位' },
-                    { id: 'res-rank3', label: '🥉三位', key: '3位' },
-                    { id: 'res-rank4', label: '四位', key: '4位' },
-                    { id: 'res-rank5', label: '五位', key: '5位' },
-                    { id: 'res-rank6', label: '六位', key: '6位' }
-                ];
-
-                ranks.forEach(rank => {
-                    const el = document.getElementById(rank.id);
-                    if (el) {
-                        // スプレッドシートに値がある場合のみ表示
-                        const name = data[rank.key];
-                        if (name) {
-                            el.innerHTML = `${rank.label}: ${name}`;
-                            el.style.display = 'block';
-                        } else {
-                            el.style.display = 'none'; // 値がなければ隠す
-                        }
-                    }
-                });
-                
-                // 当選者一覧を生成（1〜6名分）
-                const winnersList = document.getElementById('res-winners');
-                if (winnersList) {
-                    let winnersHtml = "";
-                    for (let i = 1; i <= 6; i++) {
-                        const winnerName = data[`当選者${i}`];
-                        if (winnerName) {
-                            winnersHtml += `<li>${winnerName}</li>`;
-                        }
-                    }
-                    winnersList.innerHTML = winnersHtml;
-                }
+            } else if (data['発表フラグ'] === "決選投票") {
+                // ★追加：決選投票の場合
+                statusEl.textContent = "決選投票を行います。";
+                detailsEl.style.display = 'none'; // 詳細（順位など）は隠す
 
             } else {
-                // 発表フラグが「発表済み」以外の場合
+                // 未発表などの場合
                 statusEl.textContent = `${displayDate}の選挙の結果は発表されていません。`;
-                detailsEl.style.display = 'none'; // 結果エリアを隠す
+                detailsEl.style.display = 'none'; 
             }
         } catch (error) {
-            console.error("データの読み込みエラー:", error);
-            const statusEl = document.getElementById('result-status');
-            if (statusEl) {
-                statusEl.textContent = "データの読み込みに失敗しました。GASのURLやデプロイ設定を確認してください。";
-            }
+            console.error("読み込みエラー:", error);
+            document.getElementById('result-status').textContent = "データの読み込みに失敗しました。";
         }
     }
 
-    // ページが表示されたらデータを読み込む
+    // 結果を表示するための補助的な関数
+    function displayResults(data) {
+        // リーダー
+        const leaderEl = document.getElementById('res-leader');
+        if (leaderEl) leaderEl.textContent = data['リーダー'] || "---";
+
+        // 順位 (1位〜6位)
+        const ranks = [
+            { id: 'res-rank1', label: '🥇一位', key: '1位' },
+            { id: 'res-rank2', label: '🥈二位', key: '2位' },
+            { id: 'res-rank3', label: '🥉三位', key: '3位' },
+            { id: 'res-rank4', label: '四位', key: '4位' },
+            { id: 'res-rank5', label: '五位', key: '5位' },
+            { id: 'res-rank6', label: '六位', key: '6位' }
+        ];
+
+        ranks.forEach(rank => {
+            const el = document.getElementById(rank.id);
+            if (el) {
+                const name = data[rank.key];
+                if (name) {
+                    el.innerHTML = `${rank.label}: ${name}`;
+                    el.style.display = 'block';
+                } else {
+                    el.style.display = 'none';
+                }
+            }
+        });
+        
+        // 当選者一覧
+        const winnersList = document.getElementById('res-winners');
+        if (winnersList) {
+            let winnersHtml = "";
+            for (let i = 1; i <= 6; i++) {
+                const winnerName = data[`当選者${i}`];
+                if (winnerName) winnersHtml += `<li>${winnerName}</li>`;
+            }
+            winnersList.innerHTML = winnersHtml;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', loadSpreadsheetData);
 </script>
 </body>
