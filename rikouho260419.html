@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<title>立候補者一覧 - 選挙管理委員会</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+        @font-face {
+            font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO';
+            src: url('https://tsakurai5252-arch.github.io/my-page/HGRSKP.TTF') format('truetype');
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: 'HGSeikaishotaiPRO';
+            src: url('https://tsakurai5252-arch.github.io/my-page/HGRSKP.TTF') format('truetype');
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: 'French';
+            src: url('https://tsakurai5252-arch.github.io/my-page/FRSCRIPT.TTF') format('truetype');
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: 'HGP行書体';
+            src: url('https://tsakurai5252-arch.github.io/my-page/HGRGY.TTC') format('truetype');
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: 'MS P明朝';
+            src: url('https://tsakurai5252-arch.github.io/my-page/msmincho.ttc') format('truetype');
+            font-weight: bold;
+        }
+
+        @font-face {
+            font-family: 'MS PMincho';
+            src: url('https://tsakurai5252-arch.github.io/my-page/msmincho.ttc') format('truetype');
+            font-weight: bold;
+        }
+
+
+        @font-face {
+            font-family: 'POP';
+            src: url('https://tsakurai5252-arch.github.io/my-page/HGRPP1.TTC') format('truetype');
+            font-weight: bold;
+        }
+
+
+
+        a {
+          outline: none;
+          text-decoration: underline;
+        }
+        
+        a:link { color: #0000FF; }
+        a:visited { color: #0000FF; }
+        a:active { color: #0000FF; }
+
+        a:link {
+          color: #0000FF; 
+          transition: 0.4s; 
+        }
+
+        a:hover {
+          color: red; 
+        }
+
+       /* a-greenというクラスがついたaタグだけを緑色にする */
+       .a-green {
+        color: blue;
+        text-decoration: none; /* 下線を消したい場合は追加 */
+        }
+
+  /* マウスを乗せたときの色を変えたい場合はこちら */
+  .a-green:hover {
+    color: green;
+  }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            padding: 20px;
+            /* 初期状態ではテキスト選択を禁止 */
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .toc {
+            background: #f4f4f4;
+            padding: 20px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        h1 { font-size: clamp(24px, 5vw, 40px); }
+        h2 { font-size: clamp(20px, 4vw, 32px); }
+
+        section {
+            margin-top: 30px;
+            padding: 10px;
+        }
+
+        .border-box {
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block; 
+            margin-bottom: 10px;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        /* --- 保護用のスタイル --- */
+        #protected-content {
+            display: none; 
+        }
+        .unlock-msg {
+            text-align: center;
+            margin-top: 50px;
+            padding: 40px 20px;
+            background: #fffbe6;
+            border: 2px solid #ffe58f;
+            border-radius: 10px;
+        }
+        .unlock-msg h2 {
+            margin-bottom: 10px;
+            color: #856404;
+        }
+        .unlock-msg p {
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .unlock-msg button {
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #faad14;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .unlock-msg button:hover {
+            background: #d48806;
+        }
+
+.container {
+            display: inline-block; 
+            text-align: center;
+            background: white;
+            padding: 1.5rem 2.5rem; /* 左右に少し余裕を持たせています */
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            /* 念のため、画面からはみ出さないよう設定 */
+            max-width: 90%;
+            white-space: nowrap; /* テキストが勝手に改行されないようにします */
+        }
+        #countdown {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #e63946;
+        }
+
+/* --- トップへ戻るボタンのスタイル --- */
+        #pagetop-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: #0000FF;
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 12px;
+            opacity: 0;          /* 最初は隠す */
+            visibility: hidden;  /* 最初は隠す */
+            transition: 0.3s;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        #pagetop-btn:hover {
+            background: red;
+            color: #fff;
+        }
+
+        /* 表示された時の状態 */
+        #pagetop-btn.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+    </style>
+</head>
+<body id="top">
+
+<a href="#page_top" id="pagetop-btn">TOP</a>
+
+<section id="page_top">
+<b><h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">2026年4月19日　選挙管理委員会</h3></b>
+<small><p  style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">立候補者・ポスター閲覧システム</p></small>
+</section>
+
+<div id="auth-gateway" class="unlock-msg" style="display:none;">
+    <h2 id="gateway-title" style="font-family: 'HGP行書体', 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">パスワードが必要です。パスワードがわからない場合、一般公開日までお待ちください。</h2>
+    <p id="gateway-period" style="font-family: 'MS P明朝', serif;">【一般公開日: 2026年4月19日】</p>
+    <button id="unlock-button" onclick="checkPassword()">パスワードを入力して表示する</button>
+</div>
+
+<div id="protected-content">
+<br>
+<div style="font-family: 'MS P明朝', serif;">
+<div class="container">
+        <div id="countdown">計算中...</div>
+    </div>
+</div>
+<small><p  style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">公開期間: 2026年4月19日～2026年4月20日</p></small>
+    <hr>
+    <h1 style="font-family: 'HGP行書体', 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">【立候補者】一覧</h1>
+    <br>
+    <div class="toc">
+    <h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">・目次</h3>
+<div style="display: flex; align-items: baseline; gap: 10px;">
+    <h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">・ムー党</h3>
+    <a href="#mokuji1" class="a-green" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">移動</a>
+</div>
+          <ul>
+            <li><a href="#section-rikouho1" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">ムー</a></li>
+            <li><a href="#section-rikouho2" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">モー</a></li>
+            <li><a href="#section-rikouho3" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">シマエナガ</a></li>
+            <li><a href="#section-rikouho4" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">プルート</a></li>
+</ul>
+<div style="display: flex; align-items: baseline; gap: 10px;">
+    <h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">・クマ党</h3>
+    <a href="#mokuji2" class="a-green" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">移動</a>
+</div>
+<ul>
+            <li><a href="#section-rikouho8" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">ダッフィー</a></li>
+            <li><a href="#section-rikouho9" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">うるポチャミッキー</a></li>
+            <li><a href="#section-rikouho10" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">魔法使いダッフィー</a></li>
+            <li><a href="#back_homepage_top" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">ページ最下部へ移動</a></li>
+          </ul>
+    </div><br><br><br>
+<div id="result-area">
+    <h2 id="result-status" style="font-family: 'HG正楷書体PRO', serif;">読み込み中...</h2>
+
+    <div id="result-details" style="display:none;">
+        <div class="toc">
+            <h3 style="font-family: 'HG正楷書体PRO', serif;">・リーダー</h3>
+            <ul>
+                <li id="res-leader" style="font-family: 'HG正楷書体PRO', serif;">名前</li>
+            </ul>
+
+            <h3 style="font-family: 'HG正楷書体PRO', serif;">・当選者一覧</h3>
+            <ul id="res-winners" style="font-family: 'HG正楷書体PRO', serif;">
+                </ul>
+        </div>
+        <br><br><br>
+
+        <div class="toc">
+            <h3 style="font-family: 'HG正楷書体PRO', serif;">順位</h3>
+            <p id="res-rank1" style="font-family: 'HG正楷書体PRO', serif;">🥇一位: </p>
+            <p id="res-rank2" style="font-family: 'HG正楷書体PRO', serif;">🥈二位: </p>
+            <p id="res-rank3" style="font-family: 'HG正楷書体PRO', serif;">🥉三位: </p>
+            <small>
+                <p id="res-rank4" style="font-family: 'HG正楷書体PRO', serif;">四位: </p>
+                <p id="res-rank5" style="font-family: 'HG正楷書体PRO', serif;">五位: </p>
+                <p id="res-rank6" style="font-family: 'HG正楷書体PRO', serif;">六位: </p>
+            </small>
+        </div>
+    </div>
+</div>
+<!--
+<h2 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">4月19日の選挙の結果が発表されました。</h2>
+<div class="toc">
+<h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">・リーダー</h3>
+<ul>
+<li><p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">名前</p>
+</ul>
+
+<h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">・当選者一覧</h3>
+<ul>
+<li><p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">名前</p>
+<li><p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">名前</p>
+<li><p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">名前</p>
+<li><p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">名前</p>
+<li><p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">名前</p>
+<li><p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">名前</p>
+</li></li></li></li></li></li></li>
+</ul>
+</div><br><br><br>
+
+<div class="toc">
+<h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">順位</h3>
+<p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">🥇一位: </p>
+<p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">🥈二位: </p>
+<p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">🥉三位: </p>
+<small>
+<p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">四位: </p>
+<p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">五位: </p>
+<p style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">六位: </p>
+</small>
+</div>
+-->
+    <br>
+    <h2 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">立候補者【ポスター】</h2>
+<section id="mokuji1">
+    <h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">・ムー党</h3>
+</section>
+
+    <section id="section-rikouho1">
+    <h4 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">ムー</h4>
+    <div class="toc">
+    <img src="./rikouho1.png" alt="ポスター">
+    </div>
+    </section>
+
+    <section id="section-rikouho2">
+    <h4 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">モー</h4>
+    <div class="toc">
+    <img src="./rikouho2.png" alt="ポスター">
+    </div>
+    </section>
+
+    <section id="section-rikouho3">
+    <h4 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">シマエナガ</h4>
+    <div class="toc">
+    <img src="./rikouho3.png" alt="ポスター">
+    </div> </section>
+
+    <section id="section-rikouho4">
+    <h4 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">プルート</h4>
+    <div class="toc">
+    <img src="./rikouho4.png" alt="ポスター">
+    </div> </section>
+
+<section id="mokuji2">
+    <h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">・クマ党</h3>
+</section>
+
+    <section id="section-rikouho8">
+    <h4 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">ダッフィー</h4>
+    <div class="toc">
+    <img src="./rikouho8.png" alt="ポスター">
+    </div>
+    </section>
+
+    <section id="section-rikouho9">
+    <h4 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">うるポチャミッキー</h4>
+    <div class="toc">
+    <img src="./rikouho9.png" alt="ポスター">
+    </div> </section>
+
+    <section id="section-rikouho10">
+    <h4 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">魔法使いダッフィー</h4>
+    <div class="toc">
+    <img src="./rikouho10.png" alt="ポスター">
+    </div> </section>
+
+</div>
+
+<hr>
+<center>
+<section id="back_homepage_top" class="border-box">
+<a href="#page_top" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">このページのトップへ戻る</a>
+<br>
+<a href="https://tsakurai5252-arch.github.io/my-page/" style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">ホームページトップへ戻る</a>
+</section>
+<br>
+<center>
+<p style="font-family: 'HGP行書体', 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">Copyright &#169; 2026 HomeMade Tools Project All Rights Reserved.</p>
+</center>
+
+<script>
+    // --- 公開設定 ---
+    const RELEASE_DATE = 20260419;    // 公開開始日 (YYYYMMDD)
+    const EXPIRATION_DATE = 20260420; // 公開終了日 (YYYYMMDD) ←【新しく追加】
+    const PASSWORD = "admin_bisan";      
+    let isUnlocked = false;
+
+    // 右クリック禁止
+    document.addEventListener('contextmenu', (e) => {
+        if (!isUnlocked) {
+            e.preventDefault();
+            alert("このページでは右クリックは禁止されています。");
+        }
+    });
+
+    // キーボード制限
+    document.addEventListener('keydown', (e) => {
+        if (!isUnlocked) {
+            if (e.key === "F12" || (e.ctrlKey && (e.key === "u" || e.key === "U" || e.key === "s" || e.key === "S"))) {
+                e.preventDefault();
+            }
+        }
+    });
+
+    function checkPassword() {
+        const userInput = window.prompt("パスワードを入力してください：");
+        if (userInput === PASSWORD) {
+            unlockPage();
+        } else if (userInput !== null) {
+            alert("パスワードが違います。");
+        }
+    }
+
+    function unlockPage() {
+        isUnlocked = true;
+        document.getElementById('protected-content').style.display = 'block';
+        document.getElementById('auth-gateway').style.display = 'none';
+        // 解除後は制限を解除
+        document.body.style.userSelect = "auto";
+        document.body.style.webkitUserSelect = "auto";
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const now = new Date();
+        const todayNum = parseInt(`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`);
+
+        // 公開期間内かどうかの判定
+        if (todayNum >= RELEASE_DATE && todayNum <= EXPIRATION_DATE) {
+            // 公開期間中
+            unlockPage();
+        } else if (todayNum > EXPIRATION_DATE) {
+            // 公開終了後
+            document.getElementById('auth-gateway').style.display = 'block';
+            document.getElementById('gateway-title').textContent = "閲覧できません。";
+            document.getElementById('gateway-period').textContent = "ページの公開を終了いたしました。";
+            document.getElementById('unlock-button').style.display = 'none'; // パスワードボタンを隠す
+        } else {
+            // 公開前
+            document.getElementById('auth-gateway').style.display = 'block';
+        }
+
+        // --- 個別リンクのパスワード保護機能の追加 ---
+        const protectedLinks = document.querySelectorAll('a[password]');
+        protectedLinks.forEach(link => {
+            link.textContent = "保護中: " + link.textContent;
+
+            link.addEventListener('click', (e) => {
+                const correctPass = link.getAttribute('password');
+                const userInput = window.prompt("パスワードを入力してください。");
+                
+                if (userInput === null) {
+                    e.preventDefault();
+                } else if (userInput !== correctPass) {
+                    alert("パスワードが正しくありません。");
+                    e.preventDefault();
+                }
+            });
+        });
+    });
+</script>
+
+<!--
+<script>
+    const RELEASE_DATE = 20260419; 
+    const PASSWORD = "admin_bisan";      
+    let isUnlocked = false;
+
+    // 右クリック禁止
+    document.addEventListener('contextmenu', (e) => {
+        if (!isUnlocked) {
+            e.preventDefault();
+            alert("このページでは右クリックは禁止されています。");
+        }
+    });
+
+    // キーボード制限
+    document.addEventListener('keydown', (e) => {
+        if (!isUnlocked) {
+            if (e.key === "F12" || (e.ctrlKey && (e.key === "u" || e.key === "U" || e.key === "s" || e.key === "S"))) {
+                e.preventDefault();
+            }
+        }
+    });
+
+    function checkPassword() {
+        const userInput = window.prompt("パスワードを入力してください：");
+        if (userInput === PASSWORD) {
+            unlockPage();
+        } else if (userInput !== null) {
+            alert("パスワードが違います。");
+        }
+    }
+
+    function unlockPage() {
+        isUnlocked = true;
+        document.getElementById('protected-content').style.display = 'block';
+        document.getElementById('auth-gateway').style.display = 'none';
+        // 解除後は制限を解除
+        document.body.style.userSelect = "auto";
+        document.body.style.webkitUserSelect = "auto";
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const now = new Date();
+        const todayNum = parseInt(`${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`);
+
+        if (todayNum >= RELEASE_DATE) {
+            unlockPage();
+        } else {
+            document.getElementById('auth-gateway').style.display = 'block';
+        }
+    });
+</script>
+-->
+<script>
+        function updateCountdown() {
+            const now = new Date();
+            const targetDayStart = new Date('2026-04-20T00:00:00');
+            const targetDayEnd = new Date('2026-04-20T23:59:59');
+            
+            const countdownElement = document.getElementById('countdown');
+
+            if (now < targetDayStart) {
+                const diff = targetDayStart - now;
+                const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+                countdownElement.textContent = `公開終了まで…あと${days}日`;
+            } else if (now >= targetDayStart && now < targetDayEnd) {
+                countdownElement.textContent = "本日を持ちまして公開を終了いたします。";
+            } else {
+                countdownElement.textContent = "公開は終了しました。";
+            }
+        }
+
+        updateCountdown();
+        setInterval(updateCountdown, 60000);
+    </script>
+<script>
+        const pagetopBtn = document.getElementById('pagetop-btn');
+        const pageTopSection = document.getElementById('page_top');
+
+        window.addEventListener('scroll', () => {
+            const rect = pageTopSection.getBoundingClientRect();
+            if (rect.bottom < 0) {
+                pagetopBtn.classList.add('show');
+            } else {
+                pagetopBtn.classList.remove('show');
+            }
+        });
+</script>
+<script>
+    // 【重要】GASでデプロイした際に発行された「ウェブアプリURL」に書き換えてください。
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwy46djZyid18LcgijKWrmyM7kjTAeQar2GSjav22e1XCuWJns_Ah4SxW8ouhh_8x5E/exec"; 
+
+    async function loadSpreadsheetData() {
+        try {
+            // スプレッドシート（GAS）からデータを取得
+            const response = await fetch(GAS_URL);
+            const data = await response.json();
+
+            // 1. 取得した日付を変数に入れる
+            const displayDate = data['日付'] || "2026年4月19日";
+
+            // 2. ヘッダーの日付部分を書き換え
+            const headerDate = document.getElementById('header-date');
+            if (headerDate) {
+                headerDate.textContent = `${displayDate}　選挙管理委員会`;
+            }
+            
+            const statusEl = document.getElementById('result-status');
+            const detailsEl = document.getElementById('result-details');
+            
+            // 3. 「発表フラグ」が「発表済み」かチェック
+            if (data['発表フラグ'] === "発表済み") {
+                // 発表済みの場合のメッセージ
+                statusEl.textContent = `${displayDate}の選挙の結果が発表されました。`;
+                detailsEl.style.display = 'block'; // 結果エリアを表示
+                
+                // リーダー名の書き換え
+                const leaderEl = document.getElementById('res-leader');
+                if (leaderEl) {
+                    leaderEl.textContent = data['リーダー'] || "---";
+                }
+
+                // 順位の書き換え (1位〜6位)
+                const ranks = [
+                    { id: 'res-rank1', label: '🥇一位', key: '1位' },
+                    { id: 'res-rank2', label: '🥈二位', key: '2位' },
+                    { id: 'res-rank3', label: '🥉三位', key: '3位' },
+                    { id: 'res-rank4', label: '四位', key: '4位' },
+                    { id: 'res-rank5', label: '五位', key: '5位' },
+                    { id: 'res-rank6', label: '六位', key: '6位' }
+                ];
+
+                ranks.forEach(rank => {
+                    const el = document.getElementById(rank.id);
+                    if (el) {
+                        // スプレッドシートに値がある場合のみ表示
+                        const name = data[rank.key];
+                        if (name) {
+                            el.innerHTML = `${rank.label}: ${name}`;
+                            el.style.display = 'block';
+                        } else {
+                            el.style.display = 'none'; // 値がなければ隠す
+                        }
+                    }
+                });
+                
+                // 当選者一覧を生成（1〜6名分）
+                const winnersList = document.getElementById('res-winners');
+                if (winnersList) {
+                    let winnersHtml = "";
+                    for (let i = 1; i <= 6; i++) {
+                        const winnerName = data[`当選者${i}`];
+                        if (winnerName) {
+                            winnersHtml += `<li>${winnerName}</li>`;
+                        }
+                    }
+                    winnersList.innerHTML = winnersHtml;
+                }
+
+            } else {
+                // 発表フラグが「発表済み」以外の場合
+                statusEl.textContent = `${displayDate}の選挙の結果は発表されていません。`;
+                detailsEl.style.display = 'none'; // 結果エリアを隠す
+            }
+        } catch (error) {
+            console.error("データの読み込みエラー:", error);
+            const statusEl = document.getElementById('result-status');
+            if (statusEl) {
+                statusEl.textContent = "データの読み込みに失敗しました。GASのURLやデプロイ設定を確認してください。";
+            }
+        }
+    }
+
+    // ページが表示されたらデータを読み込む
+    document.addEventListener('DOMContentLoaded', loadSpreadsheetData);
+</script>
+</body>
+</html>
