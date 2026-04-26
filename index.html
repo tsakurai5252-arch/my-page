@@ -192,6 +192,35 @@
             border-radius: 8px;
             display: inline-block;
         }
+
+                a {
+          outline: none;
+          text-decoration: underline;
+        }
+        
+        a:link { color: #0000FF; }
+        a:visited { color: #0000FF; }
+        a:active { color: #0000FF; }
+
+        a:link {
+          color: #0000FF; 
+          transition: 0.4s; 
+        }
+
+        a:hover {
+          color: red; 
+        }
+
+       /* a-greenというクラスがついたaタグだけを緑色にする */
+       .a-green {
+        color: blue;
+        text-decoration: none; /* 下線を消したい場合は追加 */
+        }
+
+  /* マウスを乗せたときの色を変えたい場合はこちら */
+  .a-green:hover {
+    color: green;
+  }
     </style>
 </head>
 <body>
