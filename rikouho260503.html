@@ -211,11 +211,55 @@
             visibility: visible;
         }
 
+/* --- 右上のロード中インジケーター --- */
+        #mini-loader {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7); /* 黒背景（透過） */
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.4s ease;
+            pointer-events: none; /* 下のコンテンツの操作を邪魔しない */
+        }
+
+        /* 小さなくるくるアニメーション */
+        .dot-spin {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 読み込み完了後に消す用 */
+        .hidden {
+            opacity: 0;
+        }
+
     </style>
 </head>
 <body id="top">
 
 <a href="#page_top" id="pagetop-btn">TOP</a>
+
+<!-- ロード中インジケーター -->
+    <div id="mini-loader">
+        <div class="dot-spin"></div>
+        <span>ロード中...</span>
+    </div>
 
 <section id="page_top">
 <b><h3 style="font-family: 'HG正楷書体PRO', 'HGSeikaishotaiPRO', 'MS PMincho', 'MS P明朝', 'Hiragino Mincho ProN', serif;">2026年5月3日　選挙管理委員会</h3></b>
@@ -682,5 +726,12 @@
 
     document.addEventListener('DOMContentLoaded', loadSpreadsheetData);
 </script>
+<script>
+        // 全リソースの読み込みが完了したら実行
+        window.onload = function() {
+            const loader = document.getElementById('mini-loader');
+            loader.classList.add('hidden');
+        };
+    </script>
 </body>
 </html>
