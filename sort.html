@@ -15,42 +15,47 @@
 <hr>
 <p>© Copylight 2026 HomeMade Tools Project All Rights Reserved.</p>
 <script>
-const allowedUrls = [
-    "https://sites.google.com/view/ts-site-senkyo/", 
-    "https://sites.google.com/view/hima-jin)",             
-    "https://tsakurai5252-arch.github.io/my-page"                  
-];
+        const allowedUrls = [
+            "https://sites.google.com/view/ts-site-senkyo/", 
+            "https://sites.google.com/view/hima-jin/", // カッコを修正しスラッシュを追加
+            "https://tsakurai5252-arch.github.io/my-page/" // スラッシュを追加
+        ];
 
         const query = window.location.search.substring(1);
 
-if (query) {
-    if (query.startsWith("http")) {
-        // queryが許可リストのいずれかで始まっているかチェック
-        const isAllowed = allowedUrls.some(allowedUrl => query.startsWith(allowedUrl));
-
-        if (isAllowed) {
-            window.location.href = query;
-        } else {
-            document.body.innerHTML = "<p>許可されていないURLへのリダイレクトが実行されました。</p>";
-        }
-    }
-        
         if (query) {
-            // --- 将来的な分岐の例 ---
-            if (query === "google") {
-                // 特定の単語なら外部サイトへ飛ばす、などの拡張が可能
+            // 1. 外部URL（http...）が直接指定された場合の処理
+            if (query.startsWith("http")) {
+                const isAllowed = allowedUrls.some(allowedUrl => query.startsWith(allowedUrl));
+
+                if (isAllowed) {
+                    const userConfirmed = confirm("リダイレクト先は " + query + " です。\n移動しますか？");
+                    if (userConfirmed) {
+                        window.location.href = query;
+                    } else {
+                        document.body.innerHTML = "<p>キャンセルしました。<a href='index.html'>トップへ戻る</a></p>";
+                    }
+                } else {
+                    document.body.innerHTML = "<p>許可されていないURLへのリダイレクトが実行されました。</p>";
+                }
+            } 
+            // 2. ショートカット（google, senkyo, himajinなど）の処理
+            else if (query === "google") {
                 window.location.href = "https://www.google.com";
             } 
             else if (query.startsWith("senkyo")) {
-                window.location.href = "https://sites.google.com/view/ts-site-senkyo/" + query;
+                // 例: ?senkyo -> .../ts-site-senkyo/senkyo になるため、必要に応じて調整
+                window.location.href = "https://sites.google.com/view/ts-site-senkyo/";
             }
             else if (query.startsWith("himajin")) {
-                window.location.href = "https://sites.google.com/view/hima-jin/" + query;
+                window.location.href = "https://sites.google.com/view/hima-jin/";
             }
+            // 3. それ以外は内部の redirect.html へ（日付検索用）
             else {
-                // デフォルト（それ以外）は予定通り redirect.html へ
                 window.location.href = "redirect.html?sort-" + query;
             }
+        } else {
+            document.body.innerHTML = "<p>パラメータが指定されていません。</p>";
         }
     </script>
 </body>
