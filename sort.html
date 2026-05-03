@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>リダイレクトしています…</title>
+</head>
+<body>
+<h1>リダイレクトしています…</h1>
+<small>しばらくお待ちください。10秒以上このままの場合は、再読み込みをお試しください。</small>
+<hr>
+<p>© Copylight 2026 HomeMade Tools Project All Rights Reserved.</p>
+<script>
+        const query = window.location.search.substring(1);
+        
+        if (query) {
+            // --- 将来的な分岐の例 ---
+            if (query === "google") {
+                // 特定の単語なら外部サイトへ飛ばす、などの拡張が可能
+                window.location.href = "https://www.google.com";
+            } 
+            else if (query.startsWith("senkyo")) {
+                window.location.href = "https://sites.google.com/view/ts-site-senkyo/" + query;
+            }
+            else if (query.startsWith("himajin")) {
+                window.location.href = "https://sites.google.com/view/hima-jin/" + query;
+            }
+            else {
+                // デフォルト（それ以外）は予定通り redirect.html へ
+                window.location.href = "redirect.html?sort-" + query;
+            }
+        }
+    </script>
+</body>
+</html>

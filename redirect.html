@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>リダイレクト先のページに移動しています</title>
+</head>
+<body>
+    <p>最新のページへ移動しています...</p><br><small>しばらくお待ちください。</small>
+
+    <script>
+        // --- 1. ここにファイルリストを手動で追加していきます ---
+        const allFiles = [
+            "rikouho.html",
+            "rikouho260419.html",
+            "rikouho260426.html",
+            "rikouho260503.html",
+            "Adnews.html",
+            "top.html",
+            "Menews.html",
+            "index.html",
+            "Admin.html"
+        ];
+
+        // --- 2. URLパラメータから検索キーワードを抽出 ---
+        // 例: "?sort-rikouho" -> "rikouho"
+        const params = window.location.search.substring(1);
+        
+        if (params.startsWith("sort-")) {
+            const keyword = params.replace("sort-", "");
+
+            // --- 3. キーワードに一致するファイルを抽出 ---
+            const matchedFiles = allFiles.filter(file => file.startsWith(keyword));
+
+            if (matchedFiles.length > 0) {
+                // --- 4. 並び替えて最新（降順）のトップを取得 ---
+                // 文字列の比較により rikouho250503.html が rikouho250429.html より優先されます
+                // ※rikouho.html(日付なし)より日付ありが優先されるようソート
+                matchedFiles.sort((a, b) => b.localeCompare(a));
+
+                const latestFile = matchedFiles[0];
+                window.location.href = latestFile;
+            } else {
+                document.body.innerHTML = "<p>該当するページが見つかりませんでした。</p>";
+            }
+        }
+    </script>
+</body>
+</html>
