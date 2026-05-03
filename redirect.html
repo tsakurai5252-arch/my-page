@@ -45,7 +45,7 @@
                 const latestFile = matchedFiles[0];
                 window.location.href = latestFile;
             } else {
-                document.body.innerHTML = "<p>該当するページが見つかりませんでした。</p>";
+                document.body.innerHTML = "<p>該当するページが見つかりませんでした。3秒後にトップページに戻ります。</p>";
                 setTimeout(() => {
             window.location.href = "index.html";
         }, 3000);
