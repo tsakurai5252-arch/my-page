@@ -16,9 +16,9 @@
 <p>© Copylight 2026 HomeMade Tools Project All Rights Reserved.</p>
 <script>
 const allowedUrls = [
-    "[https://sites.google.com/view/your-site-name](https://sites.google.com/view/ts-site-senkyo/)", 
-    "[https://twitter.com/your-account](https://sites.google.com/view/hima-jin/)",             
-    "[https://github.com/your-name](https://tsakurai5252-arch.github.io/my-page/)"                  
+    "https://sites.google.com/view/ts-site-senkyo/", 
+    "https://sites.google.com/view/hima-jin)",             
+    "https://tsakurai5252-arch.github.io/my-page"                  
 ];
 
         const query = window.location.search.substring(1);
@@ -34,8 +34,6 @@ if (query) {
             document.body.innerHTML = "<p>許可されていないURLへのリダイレクトが実行されました。</p>";
         }
     }
-    
-        const query = window.location.search.substring(1);
         
         if (query) {
             // --- 将来的な分岐の例 ---
