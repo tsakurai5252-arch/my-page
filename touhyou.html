@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>オンライン投票・アンケートフォーム</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .vote-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            color: #333;
+            text-align: center;
+        }
+        .page-indicator {
+            text-align: center;
+            font-size: 14px;
+            color: #007bff;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        /* ページ切り替え用のスタイル */
+        .form-page {
+            display: none;
+        }
+        .form-page.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+            font-size: 15px;
+        }
+        .form-group label .required {
+            color: #dc3545;
+            margin-left: 5px;
+            font-size: 12px;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .vote-options {
+            margin-bottom: 20px;
+        }
+        .vote-header-row {
+            display: flex;
+            margin-bottom: 8px;
+            gap: 10px;
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .vote-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+        .row-number {
+            font-size: 14px;
+            color: #666;
+            width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .vote-row input[type="number"],
+        .vote-row input[type="text"] {
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .input-name {
+            flex: 2;
+            background-color: #f8f9fa;
+            color: #495057;
+            cursor: default;
+        }
+        .input-value {
+            flex: 1;
+        }
+        /* グレーアウト */
+        .vote-row.disabled input {
+            background-color: #e9ecef !important;
+            color: #6c757d !important;
+            border-color: #dee2e6 !important;
+            cursor: not-allowed;
+        }
+        .vote-row.disabled .row-number {
+            color: #ced4da;
+        }
+        /* ボタンエリア */
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        .btn-next, .btn-submit {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-next:hover, .btn-submit:hover {
+            background-color: #0056b3;
+        }
+        .btn-prev {
+            background-color: #6c757d;
+            color: white;
+        }
+        .btn-prev:hover {
+            background-color: #5a6268;
+        }
+        button:disabled {
+            background-color: #ccc !important;
+            cursor: not-allowed;
+        }
+        #loadingMessage {
+            text-align: center;
+            color: #007bff;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+/* --- 右上のロード中インジケーター --- */
+        #mini-loader {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7); /* 黒背景（透過） */
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.4s ease;
+            pointer-events: none; /* 下のコンテンツの操作を邪魔しない */
+        }
+
+        /* 小さなくるくるアニメーション */
+        .dot-spin {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 読み込み完了後に消す用 */
+        .hidden {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+<!-- ロード中インジケーター -->
+    <div id="mini-loader">
+        <div class="dot-spin"></div>
+        <span>ロード中...</span>
+    </div>
+<div class="vote-container">
+    <h1>オンライン投票システム</h1>
+    <div id="pageIndicator" class="page-indicator" style="display: none;">ページ 1 / 3</div>
+    
+    <div id="loadingMessage">設定を読み込み中...</div>
+
+    <form id="voteForm" style="display: none;">
+        
+        <!-- ＝人数・1ページ目＝ -->
+        <div class="form-page active" id="page1">
+            <div class="form-group">
+                <label for="org_name">組織名 <span class="required">※任意</span></label>
+                <input type="text" id="org_name" name="org_name" placeholder="例：〇〇株式会社">
+            </div>
+            <div class="form-group">
+                <label for="rep_name">代表者名 <span class="required" style="color:red;">※必須</span></label>
+                <input type="text" id="rep_name" name="rep_name" placeholder="例：山田 太郎">
+            </div>
+            <div class="btn-container">
+                <button type="button" class="btn-next" onclick="nextPage(2)">次へ進む</button>
+            </div>
+        </div>
+
+        <!-- ＝投票・2ページ目＝ -->
+        <div class="form-page" id="page2">
+            <p style="font-size:14px; color:#666; margin-bottom:15px;">追加したい票数を入力してください（最低1箇所への入力が必須です）。</p>
+            <div class="vote-options">
+                <div class="vote-header-row">
+                    <div class="row-number"></div>
+                    <div style="flex: 2; padding-left: 5px;">名前</div>
+                    <div style="flex: 1; padding-left: 5px;">追加票数 (0〜9999)</div>
+                </div>
+
+                <!-- 1人目〜10人目の入力枠 -->
+                <div class="vote-row" id="row_1"><div class="row-number">1</div><input type="text" class="input-name" id="name_1" name="person_name_1" readOnly><input type="number" class="input-value" id="val_1" name="vote_val_1" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_2"><div class="row-number">2</div><input type="text" class="input-name" id="name_2" name="person_name_2" readOnly><input type="number" class="input-value" id="val_2" name="vote_val_2" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_3"><div class="row-number">3</div><input type="text" class="input-name" id="name_3" name="person_name_3" readOnly><input type="number" class="input-value" id="val_3" name="vote_val_3" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_4"><div class="row-number">4</div><input type="text" class="input-name" id="name_4" name="person_name_4" readOnly><input type="number" class="input-value" id="val_4" name="vote_val_4" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_5"><div class="row-number">5</div><input type="text" class="input-name" id="name_5" name="person_name_5" readOnly><input type="number" class="input-value" id="val_5" name="vote_val_5" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_6"><div class="row-number">6</div><input type="text" class="input-name" id="name_6" name="person_name_6" readOnly><input type="number" class="input-value" id="val_6" name="vote_val_6" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_7"><div class="row-number">7</div><input type="text" class="input-name" id="name_7" name="person_name_7" readOnly><input type="number" class="input-value" id="val_7" name="vote_val_7" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_8"><div class="row-number">8</div><input type="text" class="input-name" id="name_8" name="person_name_8" readOnly><input type="number" class="input-value" id="val_8" name="vote_val_8" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_9"><div class="row-number">9</div><input type="text" class="input-name" id="name_9" name="person_name_9" readOnly><input type="number" class="input-value" id="val_9" name="vote_val_9" min="0" max="9999" value="0"></div>
+                <div class="vote-row" id="row_10"><div class="row-number">10</div><input type="text" class="input-name" id="name_10" name="person_name_10" readOnly><input type="number" class="input-value" id="val_10" name="vote_val_10" min="0" max="9999" value="0"></div>
+            </div>
+            <div class="btn-container">
+                <button type="button" class="btn-prev" onclick="prevPage(1)">戻る</button>
+<!--
+                <button type="button" class="btn-next" onclick="nextPage(3)">次へ進む</button>
+-->
+                <button type="submit" class="btn-submit" id="submitBtn">投票を確定する</button>
+            </div>
+        </div>
+
+        <!-- ＝その他意見・3ページ目＝ -->
+        <!--
+        <div class="form-page" id="page3">
+            <div class="form-group">
+                <label for="opinion">その他の意見 <span class="required" style="color:#666;">※任意</span></label>
+                <textarea id="opinion" name="opinion" placeholder="ご意見やご要望がございましたらご記入ください。"></textarea>
+            </div>
+            <div class="btn-container">
+                <button type="button" class="btn-prev" onclick="prevPage(2)">戻る</button>
+                <button type="submit" class="btn-submit" id="submitBtn">投票を確定する</button>
+            </div>
+        </div>
+-->
+<br>
+<center>
+<p>(c)2026 HomeMade Tools Project All Rights Reserved.</p>
+</center>
+    </form>
+</div>
+
+<script>
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbwxVpj57hhKZz7uTxl9E_zXR_AzVtFdagYe0bz5H5c9SbtUhD1h2BkFfWc6xwCx95u7/exec";
+    let currentPage = 1;
+
+    // 画面起動時のデータ読み込み
+    window.addEventListener('DOMContentLoaded', () => {
+        fetch(GAS_URL, { method: "GET" })
+        .then(response => response.json())
+        .then(res => {
+            if (res.result === 'success') {
+                const sheetNames = res.data;
+
+                for (let i = 1; i <= 10; i++) {
+                    const rowEl = document.getElementById(`row_${i}`);
+                    const nameInput = document.getElementById(`name_${i}`);
+                    const valInput = document.getElementById(`val_${i}`);
+                    
+                    if (sheetNames && sheetNames[i - 1] && sheetNames[i - 1][0] !== "") {
+                        nameInput.value = sheetNames[i - 1][0];
+                        valInput.value = 0;
+                    } else {
+                        rowEl.classList.add('disabled');
+                        nameInput.value = "";
+                        valInput.value = 0;
+                        valInput.readOnly = true;
+                    }
+                }
+                
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('pageIndicator').style.display = 'block';
+                document.getElementById('voteForm').style.display = 'block';
+            } else {
+                document.getElementById('loadingMessage').innerText = 'データの取得に失敗しました。';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('loadingMessage').innerText = 'サーバーとの通信に失敗しました。';
+        });
+    });
+
+    // ページを次に進める処理（バリデーション付き）
+    function nextPage(pageNumber) {
+        if (pageNumber === 2) {
+            // 1ページ目のチェック：代表者名が必須
+            const repName = document.getElementById('rep_name').value.trim();
+            if (repName === "") {
+                alert("必須項目を入力してください。");
+                return;
+            }
+        }
+        
+        if (pageNumber === 3) {
+            // 2ページ目のチェック：どれか1箇所以上に「1以上」の票が入っているか
+            let totalVoteCheck = 0;
+            for (let i = 1; i <= 10; i++) {
+                const rowEl = document.getElementById(`row_${i}`);
+                if (!rowEl.classList.contains('disabled')) {
+                    totalVoteCheck += parseInt(document.getElementById(`val_${i}`).value, 10) || 0;
+                }
+            }
+            if (totalVoteCheck <= 0) {
+                alert("最低でも1票以上の投票を行ってください。");
+                return;
+            }
+        }
+
+        // ページの切り替え
+        document.getElementById(`page${currentPage}`).classList.remove('active');
+        document.getElementById(`page${pageNumber}`).classList.add('active');
+        currentPage = pageNumber;
+        document.getElementById('pageIndicator').innerText = `ページ ${currentPage} / 2`;
+    }
+
+    // ページを前に戻す処理
+    function prevPage(pageNumber) {
+        document.getElementById(`page${currentPage}`).classList.remove('active');
+        document.getElementById(`page${pageNumber}`).classList.add('active');
+        currentPage = pageNumber;
+        document.getElementById('pageIndicator').innerText = `ページ ${currentPage} / 2`;
+    }
+
+    // フォーム送信（3ページ目で確定ボタンが押されたとき）
+    document.getElementById('voteForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerText = "送信中...";
+
+        const searchParams = new URLSearchParams();
+        
+        // 1ページ目と3ページ目のデータをセット
+        searchParams.append('org_name', document.getElementById('org_name').value);
+        searchParams.append('rep_name', document.getElementById('rep_name').value);
+        searchParams.append('opinion', document.getElementById('opinion').value);
+
+        // 2ページ目の投票データをセット
+        for (let i = 1; i <= 10; i++) {
+            const rowEl = document.getElementById(`row_${i}`);
+            const nameVal = document.getElementById(`name_${i}`).value;
+            const valVal = document.getElementById(`val_${i}`).value;
+            
+            if (!rowEl.classList.contains('disabled')) {
+                searchParams.append(`person_name_${i}`, nameVal);
+                searchParams.append(`vote_val_${i}`, valVal);
+            }
+        }
+
+        fetch(GAS_URL, {
+            method: "POST",
+            body: searchParams,
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.result === 'success') {
+                alert('投票が完了しました。');
+                window.location.reload(); // 最初から（1ページ目）に戻す
+            } else {
+                alert('エラーが発生しました。もう一度お試しください。');
+                submitBtn.disabled = false;
+                submitBtn.innerText = "投票を確定する";
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('サーバーとの通信に失敗したため、投票できませんでした。');
+            submitBtn.disabled = false;
+            submitBtn.innerText = "投票を確定する";
+        });
+    });
+</script>
+<script>
+        // 全リソースの読み込みが完了したら実行
+        window.onload = function() {
+            const loader = document.getElementById('mini-loader');
+            loader.classList.add('hidden');
+        };
+    </script>
+
+</body>
+</html>
