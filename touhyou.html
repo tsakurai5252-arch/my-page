@@ -349,7 +349,7 @@
         document.getElementById(`page${currentPage}`).classList.remove('active');
         document.getElementById(`page${pageNumber}`).classList.add('active');
         currentPage = pageNumber;
-        document.getElementById('pageIndicator').innerText = `ページ ${currentPage} / 2`;
+        document.getElementById('pageIndicator').innerText = `ページ ${currentPage} / 3`;
     }
 
     // ページを前に戻す処理
@@ -357,7 +357,7 @@
         document.getElementById(`page${currentPage}`).classList.remove('active');
         document.getElementById(`page${pageNumber}`).classList.add('active');
         currentPage = pageNumber;
-        document.getElementById('pageIndicator').innerText = `ページ ${currentPage} / 2`;
+        document.getElementById('pageIndicator').innerText = `ページ ${currentPage} / 3`;
     }
 
     // フォーム送信（3ページ目で確定ボタンが押されたとき）
