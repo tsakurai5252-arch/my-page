@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MU Card 運営ブログ</title>
+  <style>
+    :root {
+      --primary: #1a365d;
+      --secondary: #2b6cb0;
+      --accent: #d69e2e;
+      --bg: #f7fafc;
+      --card-bg: #ffffff;
+      --text: #2d3748;
+      --text-muted: #718096;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+    .container { max-width: 680px; margin: 0 auto; }
+
+    /* ヘッダー */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white; padding: 25px 20px; border-radius: 12px;
+      text-align: center; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    header h1 { margin: 0; font-size: 22px; font-weight: 600; }
+    header p { margin: 6px 0 0 0; opacity: 0.85; font-size: 13px; }
+
+    /* カテゴリフィルター */
+    .filter-tabs {
+      display: flex; gap: 8px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;
+    }
+    .filter-btn {
+      padding: 8px 16px; border: 1px solid var(--border); background: white;
+      border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 600;
+      color: var(--text-muted); white-space: nowrap; transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+    }
+
+    /* ブログ記事カード一覧 */
+    .blog-list { display: flex; flex-direction: column; gap: 20px; }
+    .blog-card {
+      background: var(--card-bg); border-radius: 12px; padding: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .blog-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    /* 記事メタ情報 */
+    .post-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 12px; }
+    .post-date { color: var(--text-muted); }
+    .post-badge {
+      padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;
+    }
+    .badge-info { background: #ebf8ff; color: #2b6cb0; }
+    .badge-update { background: #feebc8; color: #c05621; }
+    .badge-campaign { background: #e6fffa; color: #234e52; }
+
+    .post-title { margin: 0 0 10px 0; font-size: 18px; color: var(--primary); line-height: 1.4; }
+    .post-excerpt { font-size: 14px; color: #4a5568; line-height: 1.6; margin-bottom: 12px; }
+    .post-content {
+      font-size: 14px; color: var(--text); line-height: 1.7; display: none;
+      border-top: 1px dashed var(--border); padding-top: 12px; margin-top: 12px;
+    }
+    .post-content p { margin: 0 0 10px 0; }
+    .post-content p:last-child { margin-bottom: 0; }
+
+    /* トグルボタン */
+    .read-more-btn {
+      background: none; border: none; color: var(--secondary); font-weight: bold;
+      font-size: 13px; cursor: pointer; padding: 0; display: inline-flex; align-items: center; gap: 4px;
+    }
+    .read-more-btn:hover { text-decoration: underline; }
+  </style>
+  <!-- 白文字にしたい場合 -->
+<div id="common-menu-area">
+  <menu-text>FFFFFF</menu-text>
+</div>
+  <!-- 共通ヘッダー読み込み -->
+  <script src="menu.js"></script>
+</head>
+<body>
+  <!-- ヘッダー挿入エリア -->
+  <div id="common-menu-area">
+    <menu-text>000000</menu-text>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>MU Card 運営ブログ</h1>
+      <p>システム更新情報・キャンペーン・お知らせ</p>
+    </header>
+
+    <!-- カテゴリフィルター -->
+    <div class="filter-tabs">
+      <button class="filter-btn active" onclick="filterPosts('all', event)">すべて</button>
+      <button class="filter-btn" onclick="filterPosts('info', event)">お知らせ</button>
+      <button class="filter-btn" onclick="filterPosts('update', event)">アップデート</button>
+      <button class="filter-btn" onclick="filterPosts('campaign', event)">キャンペーン</button>
+    </div>
+
+    <!-- 記事一覧 -->
+    <div class="blog-list">
+      <!-- 記事1 -->
+      <article class="blog-card" data-category="update">
+        <div class="post-meta">
+          <span class="post-date">2026.08.11</span>
+          <span class="post-badge badge-update">アップデート</span>
+        </div>
+        <h2 class="post-title">会員マイページの自動セキュリティチェック機能を強化しました</h2>
+        <div class="post-excerpt">
+          カードステータス判定処理の改善を行い、一時停止中および無効化されたカードの認証セキュリティを強化いたしました。
+        </div>
+        <div class="post-content" id="content-1">
+          <p>日頃よりMU Cardをご利用いただき誠にありがとうございます。</p>
+          <p>今回のシステムアップデートでは、会員マイページおよび決済APIにおいて以下のセキュリティ改善を行いました。</p>
+          <p>・無効化カード（ステータス：FALSE）および有効期限切れ等（ステータス：PAUSE）のリアルタイム自動検知ロジックを追加<br>
+          ・マイページでの各種手続き時における暗証番号照合の厳格化</p>
+          <p>今後もより安心・安全にご利用いただける環境作りに努めてまいります。</p>
+        </div>
+        <button class="read-more-btn" onclick="toggleContent(1, this)">続きを読む ▼</button>
+      </article>
+
+      <!-- 記事2 -->
+<!--
+      <article class="blog-card" data-category="campaign">
+        <div class="post-meta">
+          <span class="post-date">2026.08.10</span>
+          <span class="post-badge badge-campaign">キャンペーン</span>
+        </div>
+        <h2 class="post-title">【ゴールド会員昇格特典】プレミアムパス導入キャンペーン開催中！</h2>
+        <div class="post-excerpt">
+          期間限定で「プレミアム会員券」をご購入いただいた皆様全員のカードランクが「ゴールド」へ即時ランクアップ！
+        </div>
+        <div class="post-content" id="content-2">
+          <p>決済システムを通じて「プレミアム会員券」をご購入いただくと、自動的に会員ランクが「ゴールド」へ昇格するキャンペーンを実施中です。</p>
+          <p><strong>【キャンペーン概要】</strong><br>
+          ・対象商品：プレミアム会員券（premium_pass）<br>
+          ・特典：購入後即時にカードランクが「ゴールド」へ自動更新されます。<br>
+          ・対象：全ランクのMU Card会員様</p>
+          <p>この機会にぜひゴールド会員の限定特典をお試しください。</p>
+        </div>
+        <button class="read-more-btn" onclick="toggleContent(2, this)">続きを読む ▼</button>
+      </article>
+-->
+      <!-- 記事3 -->
+      <article class="blog-card" data-category="info">
+        <div class="post-meta">
+          <span class="post-date">2026.08.10</span>
+          <span class="post-badge badge-info">お知らせ</span>
+        </div>
+        <h2 class="post-title">運営応援・寄付機能リリースのお知らせ</h2>
+        <div class="post-excerpt">
+          保有ポイントを利用して開発者を応援できる「寄付機能」を新たにリリースいたしました。
+        </div>
+        <div class="post-content" id="content-3">
+          <p>MU Cardをご利用いただきありがとうございます。</p>
+          <p>この度MU Cardは、ポイント寄付ページを開設いたしました。</p>
+        </div>
+        <button class="read-more-btn" onclick="toggleContent(3, this)">続きを読む ▼</button>
+      </article>
+    </div>
+  </div>
+
+  <script>
+    // 記事の展開・折りたたみ機能
+    function toggleContent(id, btn) {
+      const content = document.getElementById('content-' + id);
+      if (content.style.display === 'block') {
+        content.style.display = 'none';
+        btn.innerText = '続きを読む ▼';
+      } else {
+        content.style.display = 'block';
+        btn.innerText = '閉じる ▲';
+      }
+    }
+
+    // カテゴリフィルター機能
+    function filterPosts(category, evt) {
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      evt.target.classList.add('active');
+
+      const cards = document.querySelectorAll('.blog-card');
+      cards.forEach(card => {
+        if (category === 'all' || card.getAttribute('data-category') === category) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
