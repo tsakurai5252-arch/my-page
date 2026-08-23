@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TF FTP 公式サイト</title>
+  
+  <!-- 共通メニューファイルを読み込み -->
+  <script src="menu.js"></script>
+
+  <style>
+    :root {
+      --primary: #1a365d;
+      --secondary: #2b6cb0;
+      --accent: #d69e2e;
+      --bg: #f7fafc;
+      --card-bg: #ffffff;
+      --text: #2d3748;
+      --text-muted: #718096;
+      --border: #e2e8f0;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; line-height: 1.6; }
+    .container { max-width: 800px; margin: 0 auto; }
+
+    /* ヒーローセクション */
+    .hero {
+      background: linear-gradient(135deg, #1a365d 0%, #2b6cb0 100%);
+      color: white; border-radius: 16px; padding: 40px 25px;
+      text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,0.12); margin-bottom: 30px;
+    }
+    .hero h1 { font-size: 28px; margin: 0 0 10px 0; font-weight: 700; letter-spacing: 1px; }
+    .hero p { font-size: 15px; opacity: 0.9; margin: 0 0 25px 0; }
+    .hero-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-hero {
+      padding: 12px 24px; border-radius: 8px; font-weight: bold; text-decoration: none;
+      font-size: 15px; transition: transform 0.2s, opacity 0.2s;
+    }
+    .btn-hero:hover { transform: translateY(-2px); opacity: 0.95; }
+    .btn-hero-main { background: var(--accent); color: #1a202c; }
+    .btn-hero-sub { background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); }
+
+    /* お知らせ・連絡事項セクション */
+    .section-card {
+      background: var(--card-bg); border-radius: 14px; padding: 25px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.04); border: 1px solid var(--border); margin-bottom: 30px;
+    }
+    .section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--border);
+    }
+    .section-title { font-size: 18px; font-weight: bold; color: var(--primary); margin: 0; display: flex; align-items: center; gap: 8px; }
+
+    /* お知らせリスト */
+    .news-list { list-style: none; padding: 0; margin: 0; }
+    .news-item {
+      padding: 14px 0; border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .news-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .news-meta { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+    .news-date { color: var(--text-muted); font-weight: 500; }
+    .badge {
+      padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white;
+    }
+    .badge-important { background-color: #e53e3e; } /* 重要 */
+    .badge-info { background-color: #3182ce; }      /* お知らせ */
+    .badge-maint { background-color: #dd6b20; }     /* メンテナンス */
+    .news-title { font-weight: 600; font-size: 15px; color: var(--text); }
+    .news-detail { font-size: 13px; color: #4a5568; margin-top: 4px; white-space: pre-wrap; }
+
+    /* 機能紹介カード */
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 30px; }
+    .feature-card {
+      background: var(--card-bg); padding: 20px; border-radius: 12px;
+      border: 1px solid var(--border); text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    .feature-icon { font-size: 32px; margin-bottom: 10px; }
+    .feature-title { font-weight: bold; margin-bottom: 6px; color: var(--primary); }
+    .feature-desc { font-size: 13px; color: var(--text-muted); margin: 0; }
+
+    /* フッター */
+    footer { text-align: center; padding: 20px; color: var(--text-muted); font-size: 13px; }
+
+        @font-face {
+            font-family: 'HGP明朝B', 'HGPMinchoB';
+            src: url('../font/FONT.TTC') format('truetype');
+            font-weight: bold;
+        }
+
+/* すべての画像を元の大きさの70%にする設定です */
+    img {
+      width: 75%;
+      height: auto; /* 画像がゆがまないように縦横のバランスを自動で調整します */
+    }
+
+        a {
+          outline: none;
+          text-decoration: underline;
+        }
+        
+        a:link { color: #0000FF; }
+        a:visited { color: #0000FF; }
+        a:active { color: #0000FF; }
+
+        a:link {
+          color: #0000FF; 
+          transition: 0.4s; 
+        }
+
+       /* a-greenというクラスがついたaタグだけを緑色にする */
+       .a-green {
+        color: blue;
+        text-decoration: none; /* 下線を消したい場合は追加 */
+        }
+
+  /* マウスを乗せたときの色を変えたい場合はこちら */
+  .a-green:hover {
+    color: green;
+  }
+
+
+/* --- トップへ戻るボタンのスタイル --- */
+        #pagetop-btn {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: #0000FF;
+            color: #fff;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 12px;
+            opacity: 0;          /* 最初は隠す */
+            visibility: hidden;  /* 最初は隠す */
+            transition: 0.3s;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        #pagetop-btn:hover {
+            background: red;
+            color: #fff;
+        }
+
+        /* 表示された時の状態 */
+        #pagetop-btn.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+/* --- 右上のロード中インジケーター --- */
+        #mini-loader {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7); /* 黒背景（透過） */
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            transition: opacity 0.4s ease;
+            pointer-events: none; /* 下のコンテンツの操作を邪魔しない */
+        }
+
+        /* 小さなくるくるアニメーション */
+        .dot-spin {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 読み込み完了後に消す用 */
+        .hidden {
+            opacity: 0;
+        }
+
+/* 目印（クラス）がついた画像だけを元の大きさの70%にする設定です */
+    .r {
+      width: 35%;
+      height: auto; /* 画像がゆがまないように縦横のバランスを自動で調整します */
+    }
+  </style>
+</head>
+<body>
+
+  <!-- メニュー表示エリア -->
+  <div id="common-menu-area"></div>
+
+  <div class="container">
+
+    <!-- ヒーローエリア -->
+    <header class="hero">
+      <h1>TS FTP 公式サイト</h1>
+      <p>FFFTPにあこがれた開発者が作った、シンプルなFTPソフト。</p>
+      <img src="software-prev.png">
+      <div class="hero-buttons">
+        <a href="../manual/index.html" class="btn-hero btn-hero-main">オンラインマニュアル</a>
+      </div>
+    </header>
+
+    <!-- 連絡事項・お知らせセクション -->
+    <section class="section-card">
+      <div class="section-header">
+        <h2 class="section-title">📢 開発者からのお知らせ</h2>
+      </div>
+      <ul class="news-list" id="newsContainer">
+        <!-- JavaScriptで自動描画されます -->
+      </ul>
+    </section>
+
+    <!-- MUカードの特長 -->
+<!--
+    <section class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <div class="feature-title">かんたん決済</div>
+        <p class="feature-desc">カード番号と暗証番号入力で、提携サイトの決済がスムーズに完了。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">即時チャージ</div>
+        <p class="feature-desc">マイページからいつでも残高チャージ。使いたい時にすぐ利用可能。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎁</div>
+        <div class="feature-title">限定賞品交換</div>
+        <p class="feature-desc">貯まった残高やポイントで、魅力的な特典や賞品と引き換え可能。</p>
+      </div>
+    </section>
+-->
+    <!-- フッター -->
+    <footer>
+      &copy; Home Made Tools Project All Rights Reserved.
+    </footer>
+
+  </div>
+
+  <script>
+    // ★連絡事項・お知らせデータ（ここを編集するだけで更新できます）
+    const NEWS_DATA = [
+      {
+        date: "2026.08.23",
+        type: "info", // important (重要), info (お知らせ), maint (メンテナンス)
+        typeLabel: "お知らせ",
+        title: "TS FTPのダウンロードサービスの開始",
+        detail: "TS FTPのダウンロードが可能になりました。"
+      }
+    ];
+
+    // お知らせを描画する処理
+    function renderNews() {
+      const container = document.getElementById('newsContainer');
+      container.innerHTML = '';
+
+      NEWS_DATA.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'news-item';
+        
+        let badgeClass = 'badge-info';
+        if (item.type === 'important') badgeClass = 'badge-important';
+        if (item.type === 'maint') badgeClass = 'badge-maint';
+
+        li.innerHTML = `
+          <div class="news-meta">
+            <span class="news-date">${item.date}</span>
+            <span class="badge ${badgeClass}">${item.typeLabel}</span>
+          </div>
+          <div class="news-title">${item.title}</div>
+          <div class="news-detail">${item.detail}</div>
+        `;
+        container.appendChild(li);
+      });
+    }
+
+    // 初期化実行
+    window.onload = renderNews;
+  </script>
+</body>
+</html>
