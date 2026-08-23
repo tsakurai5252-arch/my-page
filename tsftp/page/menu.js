@@ -85,7 +85,7 @@ window.addEventListener('DOMContentLoaded', () => {
           <div class="header-main-group">
             <img src="logo.png" alt="ロゴ" class="header-logo">
             <p>TS FTP</p>
-            <a href="../index.html" class="common-nav-link">オンラインマニュアル</a>
+            <a href="../manual/index.html" class="common-nav-link">オンラインマニュアル</a>
             <a href="download.html" class="common-nav-link">ダウンロード</a>
           </div>
           <p class="header-copyright">&copy; HomeMade Tools Project All Rights Reserved.</p>
